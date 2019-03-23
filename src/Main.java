@@ -1,16 +1,7 @@
-import javax.swing.*;
+import ui.Habitat;
 
 //Первоначальный класс
-public class Main extends JFrame {
-
-    //констркутор окна, width - ширина, height - высота
-    Main(int width, int height) {
-        super("Гречишников. ЛР 1"); //заголовок
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(width, height); //размер
-        setContentPane(new JPanel()); //добавляем панель
-        setVisible(true);
-    }
+public class Main {
 
     // обязательный метод
     public static void main(String[] args) {

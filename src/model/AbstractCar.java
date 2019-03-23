@@ -1,5 +1,7 @@
+package model;
+
 // абстрактный класс, реализующий интерфейс
-abstract class AbstractCar implements IBehaviour {
+public abstract class AbstractCar implements IBehaviour {
 
     private float x, y; //координаты
 
@@ -16,11 +18,11 @@ abstract class AbstractCar implements IBehaviour {
     }
 
     // методы получения координат
-    float getX() {
+    public float getX() {
         return x;
     }
 
-    float getY() {
+    public float getY() {
         return y;
     }
 }

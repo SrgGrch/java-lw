@@ -1,3 +1,8 @@
+package factory;
+
+import model.PassengerCar;
+import model.Truck;
+
 // интерфейс для создания объектов
 public interface AbstractFactory {
     PassengerCar createPassengerCar();
