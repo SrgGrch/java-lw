@@ -41,7 +41,7 @@ public class PaintPanel extends JPanel {
                     g.drawImage(car.GetImage(), (int) car.getX(), (int) car.getY(), 115, 50, null);
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }
