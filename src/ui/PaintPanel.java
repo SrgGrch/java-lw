@@ -1,24 +1,33 @@
-package ui;
+package ui;// панель, на которой генерируются объекты
+
 
 import model.AbstractCar;
 import model.PassengerCar;
 import model.Truck;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class ObjectPainter {
+public class PaintPanel extends JPanel {
 
-    private static ArrayList<AbstractCar> objects; // список объектов
+    private ArrayList<AbstractCar> objects1; // список объектов
 
-    public static void PaintPanelUpdate(ArrayList<AbstractCar> o) {
-        objects = o;
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
     }
 
-    public static void paintCar(Graphics g) {
+    //загрузка объектов в массив
+    void paintPanelUpdate(ArrayList<AbstractCar> o) {
+        objects1 = o;
+    }
+
+    // прорисовка объектов
+    void paintCar(Graphics g) {
         try {
             //проходим по каждому объекту в списке
-            for (AbstractCar car : objects) {
+            for (AbstractCar car : this.objects1) {
 
                 //проверяем его принадлежность к классу model.PassengerCar
                 if (car instanceof PassengerCar) {

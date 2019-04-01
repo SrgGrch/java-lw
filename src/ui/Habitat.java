@@ -32,6 +32,7 @@ public class Habitat extends JFrame {
     private boolean firstRun = true; // первый запуск
     private JPanel controlPanel;
     private JPanel rootPanel;
+    private PaintPanel paintPanel;
     private JPanel buttonPanel;
 
     // конструктор среды
@@ -42,6 +43,7 @@ public class Habitat extends JFrame {
         this.N2 = N2;
         this.P1 = P1; // веротяность генерации
         this.P2 = P2;
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -58,11 +60,10 @@ public class Habitat extends JFrame {
         setSize(JFwidth, JFheight); //размер
         setContentPane(rootPanel); //добавляем панель
         setVisible(true);
-        this.setLayout(null); //абсолютное позиционирование (точное положение можно задать)
 
         PassengerCarNum = 0; // кол-во легковых машин
         TruckNum = 0; // кол-во грузовых машин
-        objects = new ArrayList<AbstractCar>(); // список сгенерированных объектов
+        objects = new ArrayList<>(); // список сгенерированных объектов
         factory = new ConcreteFactory();
 
         timerLabel = new JLabel(); //строка таймера
@@ -70,17 +71,22 @@ public class Habitat extends JFrame {
         timerLabel.setText("Время: " + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
         timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 16));
 
-        // панель, на которой рисуются объекты
-        //gamePanel = new PaintPanel();
-        gamePanel.setLayout(null); //абсолютное позиционирование (точное положение можно задать)
-        //gamePanel.setSize(JFwidth - 100, JFheight - 100); // размеры
-        //gamePanel.setLocation(40, 40); // положение
-        gamePanel.setBackground(Color.white);
+        gamePanel.setLayout(new BorderLayout());
 
-        //startButton = new JButton();
+        paintPanel = new PaintPanel();
+        paintPanel.setBackground(Color.white);
+        paintPanel.setVisible(true);
+        paintPanel.setLayout(null);
+        paintPanel.setMinimumSize(gamePanel.getSize());
+
+        gamePanel.add(paintPanel, BorderLayout.CENTER);
+        gamePanel.revalidate();
+        gamePanel.repaint();
+
+
+
+
         startButton.setEnabled(true);
-//        startButton.setBounds(450, 5, 150, 20);
-        //startButton.setText("Start");
         startButton.addActionListener(e -> {
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
@@ -89,7 +95,7 @@ public class Habitat extends JFrame {
             if (startTime != null)
                 return;
             objects.clear(); // очищаем список объектов
-            gamePanel.removeAll(); // очищаем панель рисования объектов
+            paintPanel.removeAll(); // очищаем панель рисования объектов
 
             startTime = new Timer(); // создаем таймер
             showPanel();
@@ -111,10 +117,7 @@ public class Habitat extends JFrame {
             }, 0, 100); // каждую 0,1 секунду запускается update
         });
 
-        //stopButton = new JButton();
         stopButton.setEnabled(false);
-        //stopButton.setBounds(600, 5, 150, 20);
-        //stopButton.setText("Stop");
         stopButton.addActionListener(e -> {
             stopButton.setEnabled(false);
             startButton.setEnabled(true);
@@ -132,7 +135,7 @@ public class Habitat extends JFrame {
             N1time = 0;
             N2time = 0;
             firstRun = true;
-            gamePanel.removeAll();
+            paintPanel.removeAll();
 
         });
 
@@ -142,6 +145,9 @@ public class Habitat extends JFrame {
 //        myFrame.add(startButton); // добавляем на главное окно таймер
 //        myFrame.add(stopButton); // добавляем на главное окно таймер
 //        myFrame.repaint();
+
+        revalidate();
+        repaint();
         showPanel();
     }
 
@@ -158,7 +164,7 @@ public class Habitat extends JFrame {
                     stopButton.setEnabled(true);
                     startButton.setEnabled(false);
                     objects.clear(); // очищаем список объектов
-                    gamePanel.removeAll(); // очищаем панель рисования объектов
+                    paintPanel.removeAll(); // очищаем панель рисования объектов
 
                     startTime = new Timer(); // создаем таймер
                     showPanel();
@@ -194,7 +200,7 @@ public class Habitat extends JFrame {
                     N1time = 0;
                     N2time = 0;
                     firstRun = true;
-                    gamePanel.removeAll();
+                    paintPanel.removeAll();
 
                 }
                 if (e.getKeyCode() == KeyEvent.VK_T) {  //нажата T, показать/скрыть статистику
@@ -217,7 +223,7 @@ public class Habitat extends JFrame {
             N1time += N1 * 1000;
             if ((float) Math.random() <= P1) {
                 PassengerCarNum++; //увеличиваем счетчик
-                objects.add(factory.createPassengerCar((float) (Math.random() * gamePanel.getWidth() - 25), (float) (Math.random() * gamePanel.getHeight() - 25)));
+                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 25), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
         }
         //генерация грузовой машины
@@ -226,16 +232,17 @@ public class Habitat extends JFrame {
 
             if ((float) Math.random() <= P2) {
                 TruckNum++;//увеличиваем счетчик
-                objects.add(factory.createTruck((float) (Math.random() * gamePanel.getWidth() - 25), (float) (Math.random() * gamePanel.getHeight() - 25)));
+                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 25), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
         }
-        ObjectPainter.PaintPanelUpdate(objects);
-        ObjectPainter.paintCar(gamePanel.getGraphics());
-        gamePanel.revalidate();
+        paintPanel.paintPanelUpdate(objects); //загружает объекты в массив
+        paintPanel.paintCar(paintPanel.getGraphics()); // прорисовка объектов
+        paintPanel.revalidate();
     }
 
     private void showPanel() {
-        gamePanel.paintComponents(gamePanel.getGraphics()); //отображает компоненты контейнера
+        paintPanel.paintComponent(paintPanel.getGraphics());
+
     }
 
 }
