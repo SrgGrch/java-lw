@@ -22,7 +22,7 @@ public class Habitat extends JFrame {
     private float N1time, N2time; // время последней генерации объекта
     private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
-    private JLabel timerLabel; //отображение времени
+
     private JPanel gamePanel; // панель, на которой генерируются объекты
     private JButton stopButton;
     private JButton startButton;
@@ -34,6 +34,11 @@ public class Habitat extends JFrame {
     private JPanel rootPanel;
     private PaintPanel paintPanel;
     private JPanel buttonPanel;
+    private JCheckBox checkBoxInfo;
+    private JLabel timerLabel;
+    private JRadioButton showInfo;
+    private JRadioButton hideInfo;
+    private JPanel RadioGroup;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float N1, float N2, float P1, float P2) {
@@ -60,10 +65,8 @@ public class Habitat extends JFrame {
         objects = new ArrayList<>(); // список сгенерированных объектов
         factory = new ConcreteFactory();
 
-        timerLabel = new JLabel(); //строка таймера
-        timerLabel.setBounds(10, 2, 700, 20); // положение таймера
-        timerLabel.setText("Время: " + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
-        timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 16));
+        timerLabel.setText("Время: " + "\n" + " Легковые: " + PassengerCarNum + "\n" + " Грузовые: " + TruckNum);
+        timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 12));
 
         gamePanel.setLayout(new BorderLayout());
 
@@ -77,8 +80,17 @@ public class Habitat extends JFrame {
         gamePanel.revalidate();
         gamePanel.repaint();
 
+        showInfo.setSelected(true);
+        showInfo.addActionListener(e -> {
+            timerLabel.setVisible(true);
+            hideInfo.setSelected(false);
+        });
 
-
+        hideInfo.setSelected(false);
+        hideInfo.addActionListener(e -> {
+            timerLabel.setVisible(false);
+            showInfo.setSelected(false);
+        });
 
         startButton.setEnabled(true);
         startButton.addActionListener(e -> {
@@ -217,7 +229,7 @@ public class Habitat extends JFrame {
             N1time += N1 * 1000;
             if ((float) Math.random() <= P1) {
                 PassengerCarNum++; //увеличиваем счетчик
-                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 25), (float) (Math.random() * paintPanel.getHeight() - 25)));
+                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 100), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
         }
         //генерация грузовой машины
@@ -226,7 +238,7 @@ public class Habitat extends JFrame {
 
             if ((float) Math.random() <= P2) {
                 TruckNum++;//увеличиваем счетчик
-                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 25), (float) (Math.random() * paintPanel.getHeight() - 25)));
+                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 115), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
         }
         paintPanel.paintPanelUpdate(objects); //загружает объекты в массив
