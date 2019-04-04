@@ -93,68 +93,79 @@ public class Habitat extends JFrame {
         });
 
         startButton.setEnabled(true);
-        startButton.addActionListener(e -> {
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
-            startButton.setFocusable(false);
-            stopButton.setFocusable(true);
-            if (startTime != null)
-                return;
-            objects.clear(); // очищаем список объектов
-            paintPanel.removeAll(); // очищаем панель рисования объектов
-
-            startTime = new Timer(); // создаем таймер
-            showPanel();
-            startTime.schedule(new TimerTask() { //запуск таймера
-                @Override
-                public void run() { //метод для таймера
-                    if (firstRun) {
-                        firstTime = System.currentTimeMillis(); //начало симуляции
-                        firstRun = false;
-                    }
-
-                    long currentTime = System.currentTimeMillis();
-                    long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
-
-                    timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
-
-                    Update(ticktack); // обновляем таймер
-                }
-            }, 0, 100); // каждую 0,1 секунду запускается update
-        });
+        startButton.addActionListener(e -> startSim());
 
         stopButton.setEnabled(false);
-        stopButton.addActionListener(e -> {
-            stopButton.setEnabled(false);
-            startButton.setEnabled(true);
-            stopButton.setFocusable(false);
-            startButton.setFocusable(true);
+        stopButton.addActionListener(e -> stopSim());
 
-            if (startTime == null)
-                return;
-
-            startTime.cancel(); //останавливаем таймер
-            startTime = null;
-            objects.clear(); // очищаем список объектов
-            PassengerCarNum = 0;
-            TruckNum = 0;
-            N1time = 0;
-            N2time = 0;
-            firstRun = true;
-            paintPanel.removeAll();
-
-        });
-
-
-//        myFrame.add(gamePanel); // добавляем на главное окно панель
-//        myFrame.add(timerLabel); // добавляем на главное окно таймер
-//        myFrame.add(startButton); // добавляем на главное окно таймер
-//        myFrame.add(stopButton); // добавляем на главное окно таймер
-//        myFrame.repaint();
+        menuInit();
 
         revalidate();
         repaint();
         showPanel();
+    }
+
+    private void menuInit() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu simMenu = new JMenu("Simulation");
+        JMenuItem startSimItem = new JMenuItem("Start simulation");
+        startSimItem.addActionListener(e -> startSim());
+        JMenuItem stopSimItem = new JMenuItem("Stop simulation");
+        stopSimItem.addActionListener(e -> stopSim());
+        simMenu.add(startSimItem);
+        simMenu.add(stopSimItem);
+        menuBar.add(simMenu);
+        setJMenuBar(menuBar);
+    }
+
+    private void startSim() {
+        startButton.setEnabled(false);
+        stopButton.setEnabled(true);
+        startButton.setFocusable(false);
+        stopButton.setFocusable(true);
+        if (startTime != null)
+            return;
+        objects.clear(); // очищаем список объектов
+        paintPanel.removeAll(); // очищаем панель рисования объектов
+
+        startTime = new Timer(); // создаем таймер
+        showPanel();
+        startTime.schedule(new TimerTask() { //запуск таймера
+            @Override
+            public void run() { //метод для таймера
+                if (firstRun) {
+                    firstTime = System.currentTimeMillis(); //начало симуляции
+                    firstRun = false;
+                }
+
+                long currentTime = System.currentTimeMillis();
+                long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
+
+                timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
+
+                Update(ticktack); // обновляем таймер
+            }
+        }, 0, 100); // каждую 0,1 секунду запускается update
+    }
+
+    private void stopSim() {
+        stopButton.setEnabled(false);
+        startButton.setEnabled(true);
+        stopButton.setFocusable(false);
+        startButton.setFocusable(true);
+
+        if (startTime == null)
+            return;
+
+        startTime.cancel(); //останавливаем таймер
+        startTime = null;
+        objects.clear(); // очищаем список объектов
+        PassengerCarNum = 0;
+        TruckNum = 0;
+        N1time = 0;
+        N2time = 0;
+        firstRun = true;
+        paintPanel.removeAll();
     }
 
     //инициализация среды
@@ -165,49 +176,11 @@ public class Habitat extends JFrame {
             // клавиша нажата
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_B) { //нажата B
-                    if (startTime != null)
-                        return;
-                    stopButton.setEnabled(true);
-                    startButton.setEnabled(false);
-                    objects.clear(); // очищаем список объектов
-                    paintPanel.removeAll(); // очищаем панель рисования объектов
-
-                    startTime = new Timer(); // создаем таймер
-                    showPanel();
-                    startTime.schedule(new TimerTask() { //запуск таймера
-                        @Override
-                        public void run() { //метод для таймера
-                            if (firstRun) {
-                                firstTime = System.currentTimeMillis(); //начало симуляции
-                                firstRun = false;
-                            }
-
-                            long currentTime = System.currentTimeMillis();
-                            long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
-
-                            timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
-
-                            Update(ticktack); // обновляем таймер
-                        }
-                    }, 0, 100); // каждую 0,1 секунду запускается update
-
+                    startSim();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_E) //нажата E, симуляция завершена
                 {
-                    if (startTime == null)
-                        return;
-                    stopButton.setEnabled(false);
-                    startButton.setEnabled(true);
-                    startTime.cancel(); //останавливаем таймер
-                    startTime = null;
-                    objects.clear(); // очищаем список объектов
-                    PassengerCarNum = 0;
-                    TruckNum = 0;
-                    N1time = 0;
-                    N2time = 0;
-                    firstRun = true;
-                    paintPanel.removeAll();
-
+                    stopSim();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_T) {  //нажата T, показать/скрыть статистику
 
