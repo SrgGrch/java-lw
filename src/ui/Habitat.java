@@ -141,7 +141,7 @@ public class Habitat extends JFrame {
                 long currentTime = System.currentTimeMillis();
                 long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
 
-                timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые машины: " + PassengerCarNum + " Грузовые машины: " + TruckNum);
+                timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
 
                 Update(ticktack); // обновляем таймер
             }
