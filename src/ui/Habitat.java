@@ -5,6 +5,8 @@ import model.AbstractCar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -24,8 +26,8 @@ public class Habitat extends JFrame {
     private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
     private String[] comboItems = {
-            "0", "0.1", "0.2", "0.3", "0.4", "0.5",
-            "0.6", "0.7", "0.8", "0.9", "1"
+            "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "10"
     };
 
     private JPanel gamePanel; // панель, на которой генерируются объекты
@@ -44,7 +46,7 @@ public class Habitat extends JFrame {
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
     private JPanel RadioGroup;
-    private JComboBox probComboBox;
+    private JComboBox perComboBox;
     private JSlider probSlider;
 
     // конструктор среды
@@ -114,8 +116,14 @@ public class Habitat extends JFrame {
         probSlider.setMinimum(0);
         probSlider.setMajorTickSpacing(1);
         probSlider.setPaintLabels(true);
-
+        probSlider.setValue(5);
         probSlider.addChangeListener(e -> setProb(probSlider.getValue()));
+
+        for (String i:comboItems) {
+            perComboBox.addItem(i);
+        }
+        perComboBox.setSelectedIndex(0);
+        perComboBox.addItemListener(e -> setGenTime(perComboBox.getSelectedIndex()));
 
         menuInit();
 
@@ -124,8 +132,12 @@ public class Habitat extends JFrame {
         showPanel();
     }
 
+    private void setGenTime(int selectedIndex) {
+        N1 = N2 = selectedIndex;
+    }
+
     private void setProb(int value) {
-        P1 = P2 = value;
+        P1 = P2 = ((float) value)/10;
     }
 
     private void menuInit() {
