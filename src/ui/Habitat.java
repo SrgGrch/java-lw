@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -104,21 +105,27 @@ public class Habitat extends JFrame {
         stopButton.setEnabled(false);
         stopButton.addActionListener(e -> stopSim());
 
-        probSlider.setMaximum(100);
+        Hashtable<Integer, JLabel> sliderLabels = new Hashtable<>();
+        sliderLabels.put(0, new JLabel("0"));
+        sliderLabels.put(10, new JLabel("1"));
+
+        probSlider.setLabelTable(sliderLabels);
+        probSlider.setMaximum(10);
         probSlider.setMinimum(0);
-        probSlider.setMajorTickSpacing(10);
+        probSlider.setMajorTickSpacing(1);
+        probSlider.setPaintLabels(true);
 
-        probSlider.addChangeListener(e -> {
-
-        });
-
-        probComboBox.addItem(comboItems);
+        probSlider.addChangeListener(e -> setProb(probSlider.getValue()));
 
         menuInit();
 
         revalidate();
         repaint();
         showPanel();
+    }
+
+    private void setProb(int value) {
+        P1 = P2 = value;
     }
 
     private void menuInit() {
@@ -168,11 +175,11 @@ public class Habitat extends JFrame {
                 }
 
                 long currentTime = System.currentTimeMillis();
-                long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
+                long simTime = (currentTime - firstTime); // время прошедшее с начала симуляции
 
-                timerLabel.setText("Время: " + Math.round(ticktack / 1000.f) + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
+                timerLabel.setText("Время: " + Math.round(simTime / 1000.f) + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
 
-                Update(ticktack); // обновляем таймер
+                Update(simTime); // обновляем таймер
             }
         }, 0, 100); // каждую 0,1 секунду запускается update
     }
