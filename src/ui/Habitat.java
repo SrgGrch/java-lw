@@ -22,6 +22,10 @@ public class Habitat extends JFrame {
     private float N1time, N2time; // время последней генерации объекта
     private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
+    private String[] comboItems = {
+            "0", "0.1", "0.2", "0.3", "0.4", "0.5",
+            "0.6", "0.7", "0.8", "0.9", "1"
+    };
 
     private JPanel gamePanel; // панель, на которой генерируются объекты
     private JButton stopButton;
@@ -39,6 +43,8 @@ public class Habitat extends JFrame {
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
     private JPanel RadioGroup;
+    private JComboBox probComboBox;
+    private JSlider probSlider;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float N1, float N2, float P1, float P2) {
@@ -65,7 +71,7 @@ public class Habitat extends JFrame {
         objects = new ArrayList<>(); // список сгенерированных объектов
         factory = new ConcreteFactory();
 
-        timerLabel.setText("Время: " + "\n" + " Легковые: " + PassengerCarNum + "\n" + " Грузовые: " + TruckNum);
+        timerLabel.setText("Время: " + "0" + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
         timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 12));
 
         gamePanel.setLayout(new BorderLayout());
@@ -98,6 +104,16 @@ public class Habitat extends JFrame {
         stopButton.setEnabled(false);
         stopButton.addActionListener(e -> stopSim());
 
+        probSlider.setMaximum(100);
+        probSlider.setMinimum(0);
+        probSlider.setMajorTickSpacing(10);
+
+        probSlider.addChangeListener(e -> {
+
+        });
+
+        probComboBox.addItem(comboItems);
+
         menuInit();
 
         revalidate();
@@ -108,14 +124,27 @@ public class Habitat extends JFrame {
     private void menuInit() {
         JMenuBar menuBar = new JMenuBar();
         JMenu simMenu = new JMenu("Simulation");
+
         JMenuItem startSimItem = new JMenuItem("Start simulation");
         startSimItem.addActionListener(e -> startSim());
+
         JMenuItem stopSimItem = new JMenuItem("Stop simulation");
         stopSimItem.addActionListener(e -> stopSim());
+
         simMenu.add(startSimItem);
         simMenu.add(stopSimItem);
         menuBar.add(simMenu);
+
         setJMenuBar(menuBar);
+    }
+
+    private int showDialog() {
+        return JOptionPane.showConfirmDialog(this,
+                "Легковые машины: " + PassengerCarNum + "\n" +
+                        "Грузовые машины: " + TruckNum,
+                "Статистика",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void startSim() {
@@ -141,7 +170,7 @@ public class Habitat extends JFrame {
                 long currentTime = System.currentTimeMillis();
                 long ticktack = (currentTime - firstTime); // время прошедшее с начала симуляции
 
-                timerLabel.setText("Время: " + ticktack / 1000.f + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
+                timerLabel.setText("Время: " + Math.round(ticktack / 1000.f) + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
 
                 Update(ticktack); // обновляем таймер
             }
@@ -149,23 +178,24 @@ public class Habitat extends JFrame {
     }
 
     private void stopSim() {
-        stopButton.setEnabled(false);
-        startButton.setEnabled(true);
-        stopButton.setFocusable(false);
-        startButton.setFocusable(true);
+        if (showDialog() == 0) {
+            stopButton.setEnabled(false);
+            startButton.setEnabled(true);
+            stopButton.setFocusable(false);
+            startButton.setFocusable(true);
 
-        if (startTime == null)
-            return;
-
-        startTime.cancel(); //останавливаем таймер
-        startTime = null;
-        objects.clear(); // очищаем список объектов
-        PassengerCarNum = 0;
-        TruckNum = 0;
-        N1time = 0;
-        N2time = 0;
-        firstRun = true;
-        paintPanel.removeAll();
+            if (startTime == null)
+                return;
+            startTime.cancel(); //останавливаем таймер
+            startTime = null;
+            objects.clear(); // очищаем список объектов
+            PassengerCarNum = 0;
+            TruckNum = 0;
+            N1time = 0;
+            N2time = 0;
+            firstRun = true;
+            paintPanel.removeAll();
+        }
     }
 
     //инициализация среды
@@ -219,9 +249,12 @@ public class Habitat extends JFrame {
         paintPanel.revalidate();
     }
 
+    /**
+     * Устанавливает Graphics в paintPanel
+     */
+
     private void showPanel() {
         paintPanel.paintComponent(paintPanel.getGraphics());
-
     }
 
 }
