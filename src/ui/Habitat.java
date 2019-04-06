@@ -183,6 +183,9 @@ public class Habitat extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Функция запуска симуляции
+     */
     private void startSim() {
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
@@ -212,6 +215,10 @@ public class Habitat extends JFrame {
             }
         }, 0, 100); // каждую 0,1 секунду запускается update
     }
+
+    /**
+     * Функция остановки симуляции
+     */
 
     private void stopSim() {
         if (showDialog() == 0) {
