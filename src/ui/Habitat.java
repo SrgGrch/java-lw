@@ -5,19 +5,15 @@ import model.AbstractCar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.awt.event.*;
+import java.util.*;
 import java.util.Timer;
-import java.util.TimerTask;
 
 // среда рабочей области
 public class Habitat extends JFrame {
 
     private int JFwidth, JFheight; // размер рабочей области
+    private AbstractCar[] newObjects;
     private ArrayList<AbstractCar> objects; //массив объектов
     private ConcreteFactory factory;
     private float N1, N2, P1, P2; //N - время генерации объекта, P - вероятность генерации
@@ -119,11 +115,30 @@ public class Habitat extends JFrame {
         probSlider.setValue(5);
         probSlider.addChangeListener(e -> setProb(probSlider.getValue()));
 
-        for (String i:comboItems) {
-            perComboBox.addItem(i);
-        }
+        for (String i : comboItems) perComboBox.addItem(i);
         perComboBox.setSelectedIndex(0);
         perComboBox.addItemListener(e -> setGenTime(perComboBox.getSelectedIndex()));
+
+        this.setFocusable(true);
+        this.addKeyListener(new KeyAdapter() {
+            // клавиша нажата
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_B) { //нажата B
+                    startSim();
+                }
+                if (e.getKeyCode() == KeyEvent.VK_E) //нажата E, симуляция завершена
+                {
+                    stopSim();
+                }
+                if (e.getKeyCode() == KeyEvent.VK_T) {  //нажата T, показать/скрыть статистику
+                    if (timerLabel.isVisible()) {
+                        timerLabel.setVisible(false);
+                    } else {
+                        timerLabel.setVisible(true);
+                    }
+                }
+            }
+        });
 
         menuInit();
 
@@ -137,7 +152,7 @@ public class Habitat extends JFrame {
     }
 
     private void setProb(int value) {
-        P1 = P2 = ((float) value)/10;
+        P1 = P2 = ((float) value) / 10;
     }
 
     private void menuInit() {
@@ -155,6 +170,8 @@ public class Habitat extends JFrame {
         menuBar.add(simMenu);
 
         setJMenuBar(menuBar);
+
+        init();
     }
 
     private int showDialog() {
@@ -218,30 +235,11 @@ public class Habitat extends JFrame {
     }
 
     //инициализация среды
-    public void Init() {
+    public void init() {
         //добавляем слушателя изменений на главном окне
         //обработчик клавиш
-        this.addKeyListener(new KeyAdapter() {
-            // клавиша нажата
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_B) { //нажата B
-                    startSim();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_E) //нажата E, симуляция завершена
-                {
-                    stopSim();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_T) {  //нажата T, показать/скрыть статистику
 
-                    if (timerLabel.isVisible()) {
-                        timerLabel.setVisible(false);
-                    } else {
-                        timerLabel.setVisible(true);
-                    }
-                }
-            }
 
-        });
     }
 
     // обеновление таймера

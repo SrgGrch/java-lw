@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="material-ui-swing">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/material-ui-swing.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/material-ui-swing.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
