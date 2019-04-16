@@ -33,17 +33,17 @@ public class Habitat extends JFrame {
     private Timer startTime;  // таймер
     private long firstTime; //время начала запуска таймер
     private boolean firstRun = true; // первый запуск
-    private JPanel controlPanel;
     private JPanel rootPanel;
     private PaintPanel paintPanel;
-    private JPanel buttonPanel;
     private JCheckBox checkBoxInfo;
     private JLabel timerLabel;
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
-    private JPanel RadioGroup;
     private JComboBox perComboBox;
     private JSlider probSlider;
+    private JPanel controlPanel;
+    private JPanel buttonPanel;
+    private JPanel RadioGroup;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float N1, float N2, float P1, float P2) {
