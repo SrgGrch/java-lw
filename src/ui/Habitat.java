@@ -12,19 +12,16 @@ import java.util.Timer;
 // среда рабочей области
 public class Habitat extends JFrame {
 
+    private enum CarType {CAR, TRUCK}
+
     private int JFwidth, JFheight; // размер рабочей области
     private AbstractCar[] newObjects;
     private ArrayList<AbstractCar> objects; //массив объектов
     private ConcreteFactory factory;
-    private float N1, N2, P1, P2; //N - время генерации объекта, P - вероятность генерации
+    private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
     private long timeFromStart = 0; //время начала генерации объектов
     private float N1time, N2time; // время последней генерации объекта
     private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
-
-    private String[] comboItems = {
-            "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "10"
-    };
 
     private JPanel gamePanel; // панель, на которой генерируются объекты
     private JButton stopButton;
@@ -42,23 +39,22 @@ public class Habitat extends JFrame {
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
     private JPanel RadioGroup;
-    private JComboBox perComboBox;
-    private JSlider probSlider;
+    private JComboBox carPerComboBox;
+    private JSlider carProbSlider;
+    private JPanel carPanel;
+    private JPanel truckPanel;
+    private JComboBox truckPerComboBox;
+    private JSlider truckProbSlider;
 
     // конструктор среды
-    public Habitat(int JFwidth, int JFheight, float N1, float N2, float P1, float P2) {
+    public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
         this.JFwidth = JFwidth; // ширина
         this.JFheight = JFheight; // выоста
-        this.N1 = N1; // время генерации каждые N секунд
-        this.N2 = N2;
-        this.P1 = P1; // веротяность генерации
-        this.P2 = P2;
+        this.carGenTime = carGenTime; // время генерации каждые N секунд
+        this.truckGenTime = truckGenTime;
+        this.carProb = carProb; // веротяность генерации
+        this.truckProb = truckProb;
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
         setTitle("Гречишников ЛР2");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(JFwidth, JFheight); //размер
@@ -107,17 +103,33 @@ public class Habitat extends JFrame {
         sliderLabels.put(0, new JLabel("0"));
         sliderLabels.put(10, new JLabel("1"));
 
-        probSlider.setLabelTable(sliderLabels);
-        probSlider.setMaximum(10);
-        probSlider.setMinimum(0);
-        probSlider.setMajorTickSpacing(1);
-        probSlider.setPaintLabels(true);
-        probSlider.setValue(5);
-        probSlider.addChangeListener(e -> setProb(probSlider.getValue()));
+        carProbSlider.setLabelTable(sliderLabels);
+        carProbSlider.setMaximum(10);
+        carProbSlider.setMinimum(0);
+        carProbSlider.setMajorTickSpacing(1);
+        carProbSlider.setPaintLabels(true);
+        carProbSlider.setValue(5);
+        carProbSlider.addChangeListener(e -> setProb(carProbSlider.getValue(), CarType.CAR));
 
-        for (String i : comboItems) perComboBox.addItem(i);
-        perComboBox.setSelectedIndex(0);
-        perComboBox.addItemListener(e -> setGenTime(perComboBox.getSelectedIndex()));
+        truckProbSlider.setLabelTable(sliderLabels);
+        truckProbSlider.setMaximum(10);
+        truckProbSlider.setMinimum(0);
+        truckProbSlider.setMajorTickSpacing(1);
+        truckProbSlider.setPaintLabels(true);
+        truckProbSlider.setValue(5);
+        truckProbSlider.addChangeListener(e -> setProb(truckProbSlider.getValue(), CarType.TRUCK));
+
+        String[] comboItems = {
+                "1", "2", "3", "4", "5",
+                "6", "7", "8", "9", "10"
+        };
+        for (String i : comboItems) carPerComboBox.addItem(i);
+        carPerComboBox.setSelectedIndex(Math.round(carGenTime-1));
+        carPerComboBox.addItemListener(e -> setGenTime(carPerComboBox.getSelectedIndex() + 1, CarType.CAR));
+
+        for (String i : comboItems) truckPerComboBox.addItem(i);
+        truckPerComboBox.setSelectedIndex(Math.round(truckGenTime-1));
+        truckPerComboBox.addItemListener(e -> setGenTime(truckPerComboBox.getSelectedIndex() + 1, CarType.TRUCK));
 
         this.setFocusable(true);
         this.addKeyListener(new KeyAdapter() {
@@ -147,12 +159,14 @@ public class Habitat extends JFrame {
         showPanel();
     }
 
-    private void setGenTime(int selectedIndex) {
-        N1 = N2 = selectedIndex;
+    private void setGenTime(int selectedIndex, CarType carType) {
+        if (CarType.CAR == carType) carGenTime = selectedIndex;
+        else truckGenTime = selectedIndex;
     }
 
-    private void setProb(int value) {
-        P1 = P2 = ((float) value) / 10;
+    private void setProb(int value, CarType carType) {
+        if (CarType.CAR == carType) carProb = ((float) value) / 10;
+        else System.out.println(truckProb = ((float) value) / 10);
     }
 
     private void menuInit() {
@@ -252,18 +266,18 @@ public class Habitat extends JFrame {
     // обеновление таймера
     private void Update(long timeFromStart) {
         //генерация легковой машины
-        if (timeFromStart > N1time + N1 * 1000) {
-            N1time += N1 * 1000;
-            if ((float) Math.random() <= P1) {
+        if (timeFromStart > N1time + carGenTime * 1000) {
+            N1time += carGenTime * 1000;
+            if ((float) Math.random() <= carProb) {
                 PassengerCarNum++; //увеличиваем счетчик
                 objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 100), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
         }
         //генерация грузовой машины
-        if (timeFromStart > N2time + N2 * 1000) {
-            N2time += N2 * 1000;
+        if (timeFromStart > N2time + truckGenTime * 1000) {
+            N2time += truckGenTime * 1000;
 
-            if ((float) Math.random() <= P2) {
+            if ((float) Math.random() <= truckProb) {
                 TruckNum++;//увеличиваем счетчик
                 objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 115), (float) (Math.random() * paintPanel.getHeight() - 25)));
             }
@@ -274,7 +288,7 @@ public class Habitat extends JFrame {
     }
 
     /**
-     * Устанавливает Graphics в paintPanel
+     * Устанавливает Graphics в paint
      */
 
     private void showPanel() {
@@ -282,3 +296,13 @@ public class Habitat extends JFrame {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
