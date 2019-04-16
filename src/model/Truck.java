@@ -14,8 +14,19 @@ public class Truck extends AbstractCar {
     }// констркутор без параметров
 
     //констрктуор с параметрами
-    public Truck(float x, float y) {
-        super(x, y);// вызываем конструктор родителя
+    public Truck(float x, float y, float birthTime) {
+        super(x, y, birthTime);// вызываем конструктор родителя
+
+        //загрузка изображения в img
+        try {
+            img = ImageIO.read(new File("truck.png"));
+        } catch (IOException ex) {
+            System.out.println("Image not loaded");
+        }
+    }
+
+    public Truck(float x, float y, float birthTime, float lifetime) {
+        super(x, y, birthTime, lifetime);// вызываем конструктор родителя
 
         //загрузка изображения в img
         try {

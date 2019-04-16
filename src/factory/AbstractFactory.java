@@ -7,9 +7,13 @@ import model.Truck;
 public interface AbstractFactory {
     PassengerCar createPassengerCar();
 
+    PassengerCar createPassengerCar(float x, float y, float birthTime); // х и у - координаты
+
+    PassengerCar createPassengerCar(float x, float y, float birthTime, float lifetime); // х и у - координаты
+
     Truck createTruck();
 
-    PassengerCar createPassengerCar(float x, float y); // х и у - координаты
+    Truck createTruck(float x, float y,  float birthTime);
 
-    Truck createTruck(float x, float y);
+    Truck createTruck(float x, float y,  float birthTime, float lifetime);
 }

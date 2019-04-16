@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class PaintPanel extends JPanel {
 
-    private ArrayList<AbstractCar> objects1; // список объектов
+    private ArrayList<AbstractCar> objects; // список объектов
 
     @Override
     public void paintComponent(Graphics g) {
@@ -20,14 +20,14 @@ public class PaintPanel extends JPanel {
 
     //загрузка объектов в массив
     void paintPanelUpdate(ArrayList<AbstractCar> o) {
-        objects1 = o;
+        objects = o;
     }
 
     // прорисовка объектов
     void paintCar(Graphics g) {
         try {
             //проходим по каждому объекту в списке
-            for (AbstractCar car : this.objects1) {
+            for (AbstractCar car : this.objects) {
 
                 //проверяем его принадлежность к классу model.PassengerCar
                 if (car instanceof PassengerCar) {

@@ -15,21 +15,21 @@ public class Habitat extends JFrame {
     private enum CarType {CAR, TRUCK}
 
     private int JFwidth, JFheight; // размер рабочей области
-    private AbstractCar[] newObjects;
     private ArrayList<AbstractCar> objects; //массив объектов
+    private ArrayList<JPanel> images = new ArrayList<>();
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
     private long timeFromStart = 0; //время начала генерации объектов
-    private float N1time, N2time; // время последней генерации объекта
+    private float carTime, truckTime; // время последней генерации объекта
     private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
-
-    private JPanel gamePanel; // панель, на которой генерируются объекты
-    private JButton stopButton;
-    private JButton startButton;
 
     private Timer startTime;  // таймер
     private long firstTime; //время начала запуска таймер
     private boolean firstRun = true; // первый запуск
+
+    private JPanel gamePanel; // панель, на которой генерируются объекты
+    private JButton stopButton;
+    private JButton startButton;
     private JPanel controlPanel;
     private JPanel rootPanel;
     private PaintPanel paintPanel;
@@ -108,7 +108,7 @@ public class Habitat extends JFrame {
         carProbSlider.setMinimum(0);
         carProbSlider.setMajorTickSpacing(1);
         carProbSlider.setPaintLabels(true);
-        carProbSlider.setValue(5);
+        carProbSlider.setValue(Math.round(truckProb * 10));
         carProbSlider.addChangeListener(e -> setProb(carProbSlider.getValue(), CarType.CAR));
 
         truckProbSlider.setLabelTable(sliderLabels);
@@ -116,19 +116,20 @@ public class Habitat extends JFrame {
         truckProbSlider.setMinimum(0);
         truckProbSlider.setMajorTickSpacing(1);
         truckProbSlider.setPaintLabels(true);
-        truckProbSlider.setValue(5);
+        truckProbSlider.setValue(Math.round(truckProb * 10));
         truckProbSlider.addChangeListener(e -> setProb(truckProbSlider.getValue(), CarType.TRUCK));
 
         String[] comboItems = {
                 "1", "2", "3", "4", "5",
                 "6", "7", "8", "9", "10"
         };
+
         for (String i : comboItems) carPerComboBox.addItem(i);
-        carPerComboBox.setSelectedIndex(Math.round(carGenTime-1));
+        carPerComboBox.setSelectedIndex(Math.round(carGenTime - 1));
         carPerComboBox.addItemListener(e -> setGenTime(carPerComboBox.getSelectedIndex() + 1, CarType.CAR));
 
         for (String i : comboItems) truckPerComboBox.addItem(i);
-        truckPerComboBox.setSelectedIndex(Math.round(truckGenTime-1));
+        truckPerComboBox.setSelectedIndex(Math.round(truckGenTime - 1));
         truckPerComboBox.addItemListener(e -> setGenTime(truckPerComboBox.getSelectedIndex() + 1, CarType.TRUCK));
 
         this.setFocusable(true);
@@ -169,6 +170,7 @@ public class Habitat extends JFrame {
         else System.out.println(truckProb = ((float) value) / 10);
     }
 
+
     private void menuInit() {
         JMenuBar menuBar = new JMenuBar();
         JMenu simMenu = new JMenu("Simulation");
@@ -188,6 +190,11 @@ public class Habitat extends JFrame {
         init();
     }
 
+    /**
+     * Функция возвращающая диалог окончания симуляции
+     *
+     * @return Диалог окончания симуляции
+     */
     private int showDialog() {
         return JOptionPane.showConfirmDialog(this,
                 "Легковые машины: " + PassengerCarNum + "\n" +
@@ -233,7 +240,6 @@ public class Habitat extends JFrame {
     /**
      * Функция остановки симуляции
      */
-
     private void stopSim() {
         if (showDialog() == 0) {
             stopButton.setEnabled(false);
@@ -248,8 +254,8 @@ public class Habitat extends JFrame {
             objects.clear(); // очищаем список объектов
             PassengerCarNum = 0;
             TruckNum = 0;
-            N1time = 0;
-            N2time = 0;
+            carTime = 0;
+            truckTime = 0;
             firstRun = true;
             paintPanel.removeAll();
         }
@@ -263,34 +269,54 @@ public class Habitat extends JFrame {
 
     }
 
-    // обеновление таймера
+    /**
+     * Функция управляющая генерацией объектов
+     *
+     * @param timeFromStart время симуляции
+     */
     private void Update(long timeFromStart) {
         //генерация легковой машины
-        if (timeFromStart > N1time + carGenTime * 1000) {
-            N1time += carGenTime * 1000;
+        if (timeFromStart > carTime + carGenTime * 1000) {
+            carTime += carGenTime * 1000;
             if ((float) Math.random() <= carProb) {
                 PassengerCarNum++; //увеличиваем счетчик
-                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 100), (float) (Math.random() * paintPanel.getHeight() - 25)));
+                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 100), (float) (Math.random() * paintPanel.getHeight() - 25), timeFromStart));
             }
         }
+
         //генерация грузовой машины
-        if (timeFromStart > N2time + truckGenTime * 1000) {
-            N2time += truckGenTime * 1000;
+        if (timeFromStart > truckTime + truckGenTime * 1000) {
+            truckTime += truckGenTime * 1000;
 
             if ((float) Math.random() <= truckProb) {
                 TruckNum++;//увеличиваем счетчик
-                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 115), (float) (Math.random() * paintPanel.getHeight() - 25)));
+                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 115), (float) (Math.random() * paintPanel.getHeight() - 25), timeFromStart));
             }
         }
+
+        checkLifetime(timeFromStart);
+
         paintPanel.paintPanelUpdate(objects); //загружает объекты в массив
         paintPanel.paintCar(paintPanel.getGraphics()); // прорисовка объектов
         paintPanel.revalidate();
     }
 
+    private void checkLifetime(long timeFromStart) {
+        if (objects.size() != 0) {
+            Iterator<AbstractCar> iterator = objects.iterator();
+            for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
+                if (car.getLifetime() + car.getBirthTime() <= timeFromStart * 1000) iterator.remove();
+            }
+        }
+//        for (AbstractCar car : objects) {
+//            if (car.getLifetime() + car.getBirthTime() >= timeFromStart) objects.iterator().remove();
+//        }
+    }
+
+
     /**
      * Устанавливает Graphics в paint
      */
-
     private void showPanel() {
         paintPanel.paintComponent(paintPanel.getGraphics());
     }
