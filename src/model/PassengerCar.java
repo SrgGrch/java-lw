@@ -6,19 +6,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-// класс, наследующий абстрактный класс
 public class PassengerCar extends AbstractCar {
 
-    private static BufferedImage img; // static - для всех
+    private BufferedImage img;
 
     public PassengerCar() {
-    } // констркутор без параметров
+    }
 
-    //констрктуор с параметрами
     public PassengerCar(float x, float y, float birthTime) {
-        super(x, y, birthTime); // вызываем конструктор родителя
+        super(x, y, birthTime);
 
-        //загрузка изображения в img
         try {
             img = ImageIO.read(new File("passengercar.png"));
         } catch (IOException ex) {
@@ -27,9 +24,8 @@ public class PassengerCar extends AbstractCar {
     }
 
     public PassengerCar(float x, float y, float birthTime, float lifetime) {
-        super(x, y, birthTime, lifetime); // вызываем конструктор родителя
+        super(x, y, birthTime, lifetime);
 
-        //загрузка изображения в img
         try {
             img = ImageIO.read(new File("passengercar.png"));
         } catch (IOException ex) {
@@ -37,9 +33,8 @@ public class PassengerCar extends AbstractCar {
         }
     }
 
-    //реализуем методы интерфейса
     @Override
-    public Image GetImage() {
+    public BufferedImage getImage() {
         return img;
     }
 

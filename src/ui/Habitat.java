@@ -2,12 +2,14 @@ package ui;
 
 import factory.ConcreteFactory;
 import model.AbstractCar;
+import model.Truck;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Timer;
+import java.util.*;
 
 // среда рабочей области
 public class Habitat extends JFrame {
@@ -16,7 +18,7 @@ public class Habitat extends JFrame {
 
     private int JFwidth, JFheight; // размер рабочей области
     private ArrayList<AbstractCar> objects; //массив объектов
-    private ArrayList<JPanel> images = new ArrayList<>();
+    private HashMap<UUID, JLabel> images = new HashMap<>();
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
     private long timeFromStart = 0; //время начала генерации объектов
@@ -32,7 +34,6 @@ public class Habitat extends JFrame {
     private JButton startButton;
     private JPanel controlPanel;
     private JPanel rootPanel;
-    private PaintPanel paintPanel;
     private JPanel buttonPanel;
     private JCheckBox checkBoxInfo;
     private JLabel timerLabel;
@@ -69,15 +70,11 @@ public class Habitat extends JFrame {
         timerLabel.setText("Время: " + "0" + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
         timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 12));
 
-        gamePanel.setLayout(new BorderLayout());
+        gamePanel.setLayout(null);
+        //gamePanel.setPreferredSize(new Dimension(rootPanel.getWidth() - controlPanel.getWidth(), rootPanel.getHeight()));
 
-        paintPanel = new PaintPanel();
-        paintPanel.setBackground(Color.white);
-        paintPanel.setVisible(true);
-        paintPanel.setLayout(null);
-        paintPanel.setMinimumSize(gamePanel.getSize());
-
-        gamePanel.add(paintPanel, BorderLayout.CENTER);
+        System.out.println(gamePanel.getHeight());
+        gamePanel.setBackground(Color.white);
         gamePanel.revalidate();
         gamePanel.repaint();
 
@@ -157,7 +154,7 @@ public class Habitat extends JFrame {
 
         revalidate();
         repaint();
-        showPanel();
+        //showPanel();
     }
 
     private void setGenTime(int selectedIndex, CarType carType) {
@@ -167,7 +164,7 @@ public class Habitat extends JFrame {
 
     private void setProb(int value, CarType carType) {
         if (CarType.CAR == carType) carProb = ((float) value) / 10;
-        else System.out.println(truckProb = ((float) value) / 10);
+        else truckProb = ((float) value) / 10;
     }
 
 
@@ -186,8 +183,6 @@ public class Habitat extends JFrame {
         menuBar.add(simMenu);
 
         setJMenuBar(menuBar);
-
-        init();
     }
 
     /**
@@ -214,11 +209,9 @@ public class Habitat extends JFrame {
         stopButton.setFocusable(true);
         if (startTime != null)
             return;
-        objects.clear(); // очищаем список объектов
-        paintPanel.removeAll(); // очищаем панель рисования объектов
+        objects.clear();
 
         startTime = new Timer(); // создаем таймер
-        showPanel();
         startTime.schedule(new TimerTask() { //запуск таймера
             @Override
             public void run() { //метод для таймера
@@ -256,17 +249,13 @@ public class Habitat extends JFrame {
             TruckNum = 0;
             carTime = 0;
             truckTime = 0;
+
+            images.clear();
+
             firstRun = true;
-            paintPanel.removeAll();
+            gamePanel.removeAll();
+            gamePanel.revalidate();
         }
-    }
-
-    //инициализация среды
-    public void init() {
-        //добавляем слушателя изменений на главном окне
-        //обработчик клавиш
-
-
     }
 
     /**
@@ -275,50 +264,64 @@ public class Habitat extends JFrame {
      * @param timeFromStart время симуляции
      */
     private void Update(long timeFromStart) {
-        //генерация легковой машины
-        if (timeFromStart > carTime + carGenTime * 1000) {
-            carTime += carGenTime * 1000;
-            if ((float) Math.random() <= carProb) {
-                PassengerCarNum++; //увеличиваем счетчик
-                objects.add(factory.createPassengerCar((float) (Math.random() * paintPanel.getWidth() - 100), (float) (Math.random() * paintPanel.getHeight() - 25), timeFromStart));
-            }
-        }
 
-        //генерация грузовой машины
         if (timeFromStart > truckTime + truckGenTime * 1000) {
             truckTime += truckGenTime * 1000;
 
             if ((float) Math.random() <= truckProb) {
-                TruckNum++;//увеличиваем счетчик
-                objects.add(factory.createTruck((float) (Math.random() * paintPanel.getWidth() - 115), (float) (Math.random() * paintPanel.getHeight() - 25), timeFromStart));
+                TruckNum++;
+                objects.add(factory.createTruck((float) (Math.random() * gamePanel.getWidth() - 115),
+                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart));
+                addImage(objects.get(objects.size() - 1));
             }
+            checkLifetime(timeFromStart);
+            repaint();
+            revalidate();
         }
 
-        checkLifetime(timeFromStart);
+        if (timeFromStart > carTime + carGenTime * 1000) {
+            carTime += carGenTime * 1000;
+            if ((float) Math.random() <= carProb) {
+                PassengerCarNum++;
+                objects.add(factory.createPassengerCar((float) (Math.random() * gamePanel.getWidth() - 100),
+                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart));
+                addImage(objects.get(objects.size() - 1));
+            }
+            checkLifetime(timeFromStart);
+            repaint();
+            revalidate();
+        }
 
-        paintPanel.paintPanelUpdate(objects); //загружает объекты в массив
-        paintPanel.paintCar(paintPanel.getGraphics()); // прорисовка объектов
-        paintPanel.revalidate();
+
+    }
+
+    private void addImage(AbstractCar car) {
+        JLabel tmp = new JLabel(new ImageIcon(car.getImage()));
+
+//        if (car instanceof Truck) tmp.setSize(148, 64);
+//        else
+        tmp.setSize(car.getImage().getWidth(), car.getImage().getHeight());
+
+        tmp.setLocation(Math.round(car.getX()), Math.round(car.getY()));
+
+        gamePanel.add(tmp);
+        images.put(car.getId(), tmp);
     }
 
     private void checkLifetime(long timeFromStart) {
         if (objects.size() != 0) {
             Iterator<AbstractCar> iterator = objects.iterator();
             for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
-                if (car.getLifetime() + car.getBirthTime() <= timeFromStart * 1000) iterator.remove();
+                if (car.getLifetime() + car.getBirthTime() <= timeFromStart) {
+                    iterator.remove();
+                    JLabel img = images.get(car.getId());
+                    images.remove(car.getId());
+                    gamePanel.remove(img);
+                    if (car instanceof Truck) TruckNum--;
+                    else PassengerCarNum--;
+                }
             }
         }
-//        for (AbstractCar car : objects) {
-//            if (car.getLifetime() + car.getBirthTime() >= timeFromStart) objects.iterator().remove();
-//        }
-    }
-
-
-    /**
-     * Устанавливает Graphics в paint
-     */
-    private void showPanel() {
-        paintPanel.paintComponent(paintPanel.getGraphics());
     }
 
 }

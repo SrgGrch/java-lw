@@ -13,7 +13,7 @@ public interface AbstractFactory {
 
     Truck createTruck();
 
-    Truck createTruck(float x, float y,  float birthTime);
+    Truck createTruck(float x, float y, float birthTime);
 
     Truck createTruck(float x, float y,  float birthTime, float lifetime);
 }

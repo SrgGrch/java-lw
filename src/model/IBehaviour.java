@@ -1,8 +1,7 @@
 package model;
 
-import java.awt.*;
+import java.awt.image.BufferedImage;
 
-//интерфейс
 public interface IBehaviour {
-    Image GetImage();
+    BufferedImage getImage();
 }
