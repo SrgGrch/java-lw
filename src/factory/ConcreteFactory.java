@@ -18,23 +18,23 @@ public class ConcreteFactory implements AbstractFactory {
 
 
     @Override
-    public PassengerCar createPassengerCar(float x, float y, float birthTime) {
+    public PassengerCar createPassengerCar(float x, float y, long birthTime) {
         return new PassengerCar(x, y, birthTime);
     }
 
     @Override
-    public PassengerCar createPassengerCar(float x, float y, float birthTime, float lifetime) {
+    public PassengerCar createPassengerCar(float x, float y, long birthTime, long lifetime) {
         return new PassengerCar(x, y, birthTime, lifetime);
     }
 
 
     @Override
-    public Truck createTruck(float x, float y, float birthTime) {
+    public Truck createTruck(float x, float y, long birthTime) {
         return new Truck(x, y, birthTime);
     }
 
     @Override
-    public Truck createTruck(float x, float y, float birthTime, float lifetime) {
+    public Truck createTruck(float x, float y, long birthTime, long lifetime) {
         return new Truck(x, y, birthTime, lifetime);
     }
 }

@@ -13,7 +13,7 @@ public class Truck extends AbstractCar {
     }
 
 
-    public Truck(float x, float y, float birthTime) {
+    public Truck(float x, float y, long birthTime) {
         super(x, y, birthTime);
 
         try {
@@ -23,7 +23,7 @@ public class Truck extends AbstractCar {
         }
     }
 
-    public Truck(float x, float y, float birthTime, float lifetime) {
+    public Truck(float x, float y, long birthTime, long lifetime) {
         super(x, y, birthTime, lifetime);
 
         try {

@@ -5,9 +5,11 @@ import model.AbstractCar;
 import model.Truck;
 
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.*;
 
@@ -17,19 +19,25 @@ public class Habitat extends JFrame {
     private enum CarType {CAR, TRUCK}
 
     private int JFwidth, JFheight; // размер рабочей области
+
     private ArrayList<AbstractCar> objects; //массив объектов
     private HashMap<UUID, JLabel> images = new HashMap<>();
+    private TreeSet<UUID> uuidTree = new TreeSet<>();
+    private HashMap<UUID, Long> birthTimeMap = new HashMap<>();
+
+    long carLifeTime = 5000, truckLifeTime = 5000;
+
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
     private long timeFromStart = 0; //время начала генерации объектов
     private float carTime, truckTime; // время последней генерации объекта
-    private int PassengerCarNum = 0, TruckNum = 0; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
+    private int PassengerCarNum, TruckNum; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
-    private Timer startTime;  // таймер
-    private long firstTime; //время начала запуска таймер
-    private boolean firstRun = true; // первый запуск
+    private Timer simTimer;
+    private long firstTime;
+    private boolean firstRun = true;
 
-    private JPanel gamePanel; // панель, на которой генерируются объекты
+    private JPanel gamePanel;
     private JButton stopButton;
     private JButton startButton;
     private JPanel controlPanel;
@@ -46,6 +54,8 @@ public class Habitat extends JFrame {
     private JPanel truckPanel;
     private JComboBox truckPerComboBox;
     private JSlider truckProbSlider;
+    private JSpinner carSpinner;
+    private JSpinner truckSpinner;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
@@ -71,9 +81,6 @@ public class Habitat extends JFrame {
         timerLabel.setFont(new Font("Times New Roman", Font.BOLD, 12));
 
         gamePanel.setLayout(null);
-        //gamePanel.setPreferredSize(new Dimension(rootPanel.getWidth() - controlPanel.getWidth(), rootPanel.getHeight()));
-
-        System.out.println(gamePanel.getHeight());
         gamePanel.setBackground(Color.white);
         gamePanel.revalidate();
         gamePanel.repaint();
@@ -99,6 +106,22 @@ public class Habitat extends JFrame {
         Hashtable<Integer, JLabel> sliderLabels = new Hashtable<>();
         sliderLabels.put(0, new JLabel("0"));
         sliderLabels.put(10, new JLabel("1"));
+
+        JFormattedTextField txtCar = ((JSpinner.NumberEditor) carSpinner.getEditor()).getTextField();
+        ((NumberFormatter) txtCar.getFormatter()).setAllowsInvalid(false);
+        carSpinner.setValue(carLifeTime / 1000);
+        carSpinner.addChangeListener(e -> {
+            if ((Integer) carSpinner.getValue() < 0) carSpinner.setValue(0);
+            carLifeTime = (Integer) carSpinner.getValue() * 1000;
+        });
+
+        JFormattedTextField txtTruck = ((JSpinner.NumberEditor) truckSpinner.getEditor()).getTextField();
+        ((NumberFormatter) txtTruck.getFormatter()).setAllowsInvalid(false);
+        truckSpinner.setValue(truckLifeTime / 1000);
+        truckSpinner.addChangeListener(e -> {
+            if ((Integer) truckSpinner.getValue() < 0) truckSpinner.setValue(0);
+            truckLifeTime = (Integer) truckSpinner.getValue() * 1000;
+        });
 
         carProbSlider.setLabelTable(sliderLabels);
         carProbSlider.setMaximum(10);
@@ -207,12 +230,12 @@ public class Habitat extends JFrame {
         stopButton.setEnabled(true);
         startButton.setFocusable(false);
         stopButton.setFocusable(true);
-        if (startTime != null)
+        if (simTimer != null)
             return;
         objects.clear();
 
-        startTime = new Timer(); // создаем таймер
-        startTime.schedule(new TimerTask() { //запуск таймера
+        simTimer = new Timer(); // создаем таймер
+        simTimer.schedule(new TimerTask() { //запуск таймера
             @Override
             public void run() { //метод для таймера
                 if (firstRun) {
@@ -240,10 +263,10 @@ public class Habitat extends JFrame {
             stopButton.setFocusable(false);
             startButton.setFocusable(true);
 
-            if (startTime == null)
+            if (simTimer == null)
                 return;
-            startTime.cancel(); //останавливаем таймер
-            startTime = null;
+            simTimer.cancel(); //останавливаем таймер
+            simTimer = null;
             objects.clear(); // очищаем список объектов
             PassengerCarNum = 0;
             TruckNum = 0;
@@ -265,47 +288,44 @@ public class Habitat extends JFrame {
      */
     private void Update(long timeFromStart) {
 
-        if (timeFromStart > truckTime + truckGenTime * 1000) {
+        if (timeFromStart > truckTime + truckGenTime * 1000 && truckLifeTime != 0) {
             truckTime += truckGenTime * 1000;
 
             if ((float) Math.random() <= truckProb) {
                 TruckNum++;
                 objects.add(factory.createTruck((float) (Math.random() * gamePanel.getWidth() - 115),
-                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart));
-                addImage(objects.get(objects.size() - 1));
+                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart, truckLifeTime));
+                addCar(objects.get(objects.size() - 1));
             }
             checkLifetime(timeFromStart);
             repaint();
             revalidate();
         }
 
-        if (timeFromStart > carTime + carGenTime * 1000) {
+        if (timeFromStart > carTime + carGenTime * 1000 && carLifeTime != 0) {
             carTime += carGenTime * 1000;
             if ((float) Math.random() <= carProb) {
                 PassengerCarNum++;
                 objects.add(factory.createPassengerCar((float) (Math.random() * gamePanel.getWidth() - 100),
-                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart));
-                addImage(objects.get(objects.size() - 1));
+                        (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart, carLifeTime));
+                addCar(objects.get(objects.size() - 1));
             }
             checkLifetime(timeFromStart);
             repaint();
             revalidate();
         }
-
-
     }
 
-    private void addImage(AbstractCar car) {
+    private void addCar(AbstractCar car) {
         JLabel tmp = new JLabel(new ImageIcon(car.getImage()));
 
-//        if (car instanceof Truck) tmp.setSize(148, 64);
-//        else
         tmp.setSize(car.getImage().getWidth(), car.getImage().getHeight());
-
         tmp.setLocation(Math.round(car.getX()), Math.round(car.getY()));
 
         gamePanel.add(tmp);
         images.put(car.getId(), tmp);
+        uuidTree.add(car.getId());
+        birthTimeMap.put(car.getId(), car.getBirthTime());
     }
 
     private void checkLifetime(long timeFromStart) {
