@@ -46,7 +46,7 @@ public class Habitat extends JFrame {
     private JLabel timerLabel;
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
-    private JPanel RadioGroup;
+    private JPanel radioGroup;
     private JComboBox carPerComboBox;
     private JSlider carProbSlider;
     private JPanel carPanel;
@@ -56,6 +56,7 @@ public class Habitat extends JFrame {
     private JSpinner carSpinner;
     private JSpinner truckSpinner;
     private JButton statButton;
+    private ButtonGroup buttonGroup;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
@@ -88,13 +89,13 @@ public class Habitat extends JFrame {
         showInfo.setSelected(true);
         showInfo.addActionListener(e -> {
             timerLabel.setVisible(true);
-            hideInfo.setSelected(false);
+            //hideInfo.setSelected(false);
         });
 
         hideInfo.setSelected(false);
         hideInfo.addActionListener(e -> {
             timerLabel.setVisible(false);
-            showInfo.setSelected(false);
+            //showInfo.setSelected(false);
         });
 
         startButton.setEnabled(true);
@@ -102,6 +103,10 @@ public class Habitat extends JFrame {
 
         stopButton.setEnabled(false);
         stopButton.addActionListener(e -> stopSim());
+
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(showInfo);
+        buttonGroup.add(hideInfo);
 
         Hashtable<Integer, JLabel> sliderLabels = new Hashtable<>();
         sliderLabels.put(0, new JLabel("0"));
