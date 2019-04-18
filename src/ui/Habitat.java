@@ -9,7 +9,6 @@ import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.*;
 
@@ -56,6 +55,7 @@ public class Habitat extends JFrame {
     private JSlider truckProbSlider;
     private JSpinner carSpinner;
     private JSpinner truckSpinner;
+    private JButton statButton;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
@@ -66,7 +66,7 @@ public class Habitat extends JFrame {
         this.carProb = carProb; // веротяность генерации
         this.truckProb = truckProb;
 
-        setTitle("Гречишников ЛР2");
+        setTitle("Гречишников ЛР3");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(JFwidth, JFheight); //размер
         setContentPane(rootPanel); //добавляем панель
@@ -130,6 +130,12 @@ public class Habitat extends JFrame {
         carProbSlider.setPaintLabels(true);
         carProbSlider.setValue(Math.round(truckProb * 10));
         carProbSlider.addChangeListener(e -> setProb(carProbSlider.getValue(), CarType.CAR));
+
+        statButton.addActionListener(e -> {
+            StatDialog dialog = new StatDialog("Please select an item in the list: ", objects);
+            dialog.setOnOk(event -> System.out.println("Chosen item: " + dialog.getSelectedItem()));
+            dialog.show();
+        });
 
         truckProbSlider.setLabelTable(sliderLabels);
         truckProbSlider.setMaximum(10);
@@ -207,6 +213,7 @@ public class Habitat extends JFrame {
 
         setJMenuBar(menuBar);
     }
+
 
     /**
      * Функция возвращающая диалог окончания симуляции
