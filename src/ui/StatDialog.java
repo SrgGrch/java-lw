@@ -30,7 +30,7 @@ public class StatDialog {
     }
 
     public StatDialog(String message, ArrayList<AbstractCar> listToDisplay){
-        list = new JList(convertList(listToDisplay));
+        list = new JList<>(convertList(listToDisplay));
         list.setFont(new Font("monospaced", Font.PLAIN, 12));
         label = new JLabel(message);
         createAndDisplayOptionPane();

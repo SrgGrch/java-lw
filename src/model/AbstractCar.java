@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.*;
 import java.util.UUID;
 
 // абстрактный класс, реализующий интерфейс
@@ -43,6 +44,11 @@ public abstract class AbstractCar implements IBehaviour {
 
     public void setLifetime(long lifetime) {
         this.lifetime = lifetime;
+    }
+
+    public void setPosition(Point p){
+        x = p.x;
+        y = p.y;
     }
 
     public UUID getId() {

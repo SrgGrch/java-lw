@@ -1,5 +1,6 @@
 package ui;
 
+import ai.TruckAI;
 import factory.ConcreteFactory;
 import model.AbstractCar;
 import model.Truck;
@@ -25,6 +26,8 @@ public class Habitat extends JFrame {
     private HashMap<UUID, Long> birthTimeMap = new HashMap<>();
 
     long carLifeTime = 5000, truckLifeTime = 5000;
+
+    TruckAI truckAI;
 
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
@@ -188,7 +191,6 @@ public class Habitat extends JFrame {
 
         revalidate();
         repaint();
-        //showPanel();
     }
 
     private void setGenTime(int selectedIndex, CarType carType) {
@@ -246,6 +248,9 @@ public class Habitat extends JFrame {
             return;
         objects.clear();
 
+        truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+        truckAI.start();
+
         simTimer = new Timer(); // создаем таймер
         simTimer.schedule(new TimerTask() { //запуск таймера
             @Override
@@ -293,6 +298,25 @@ public class Habitat extends JFrame {
         }
     }
 
+    public synchronized void updateObjects(ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images) {
+        this.objects = objects;
+        this.images = images;
+    }
+
+    public synchronized ArrayList<AbstractCar> getObjects(){
+        return objects;
+    }
+
+    public synchronized HashMap<UUID, JLabel> getImages(){
+        return images;
+    }
+
+    public void repaintGamePanel(){
+        gamePanel.repaint();
+        gamePanel.revalidate();
+    }
+
+
     /**
      * Функция управляющая генерацией объектов
      *
@@ -322,6 +346,7 @@ public class Habitat extends JFrame {
                         (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart, carLifeTime));
                 addCar(objects.get(objects.size() - 1));
             }
+            truckAI.procces();
             checkLifetime(timeFromStart);
             repaint();
             revalidate();
@@ -333,11 +358,11 @@ public class Habitat extends JFrame {
 
         tmp.setSize(car.getImage().getWidth(), car.getImage().getHeight());
         tmp.setLocation(Math.round(car.getX()), Math.round(car.getY()));
-
         gamePanel.add(tmp);
         images.put(car.getId(), tmp);
         uuidTree.add(car.getId());
         birthTimeMap.put(car.getId(), car.getBirthTime());
+        truckAI.updateObjectList(objects, images);
     }
 
     private void checkLifetime(long timeFromStart) {
