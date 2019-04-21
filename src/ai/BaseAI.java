@@ -20,12 +20,13 @@ public abstract class BaseAI extends Thread {
     HashMap<UUID, JLabel> images;
     HashMap<UUID, Point> objectDestinations = new HashMap<>();
 
-    BaseAI(int width, int height, ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images, Habitat context) {
+    BaseAI(int width, int height, ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images, Habitat context, String threadName) {
         this.width = width;
         this.height = height;
         this.objects = objects;
         this.images = images;
         this.context = context;
+        this.setName(threadName);
     }
 
     /**
@@ -42,16 +43,15 @@ public abstract class BaseAI extends Thread {
 
     public void run() {
         while (running) {
-            objects = context.getObjects();
-            images = context.getImages();
+//            objects = context.getObjects();
+//            images = context.getImages();
             procces();
-            System.out.println("hi");
 
-            context.updateObjects(objects, images);
+           // context.updateObjects(objects, images);
             context.repaintGamePanel();
 
             try {
-                sleep(1000);
+                sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -82,7 +82,7 @@ public abstract class BaseAI extends Thread {
         double b = car.getY() - destination.getY();
         double distance = Math.sqrt(Math.pow(a, 2)
                 + Math.pow(b, 2));
-        return Math.acos((a * a + distance * distance + b * b) / (2 * a * distance));
+        return Math.acos((a * a + distance * distance - b * b) / (2 * a * distance));
     }
 
     abstract void move(AbstractCar car);
