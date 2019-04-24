@@ -6,10 +6,7 @@ import ui.Habitat;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 
 public class TruckAI extends BaseAI {
 
@@ -18,23 +15,36 @@ public class TruckAI extends BaseAI {
     }
 
     @Override
-    void move(AbstractCar car) {
+    Point move(AbstractCar car) {
         float newX = car.getX(), newY = car.getY();
         double angle = getAngle(car);
 
         newX -= velocity * Math.cos(angle);
         newY -= velocity * Math.sin(angle);
 
-        images.get(car.getId()).setLocation(new Point(Math.round(newX), Math.round(newY)));
-        objects.get(objects.indexOf(car)).setPosition(new Point(Math.round(newX), Math.round(newY)));
+//        if (objects.contains(car) && images.containsKey(car.getId())) {
+//            images.get(car.getId()).setLocation(new Point(Math.round(newX), Math.round(newY)));
+//            objects.get(objects.indexOf(car)).setPosition(new Point(Math.round(newX), Math.round(newY)));
+//        }
+//
+        return new Point(Math.round(newX), Math.round(newY));
     }
 
     @Override
     public void procces() {
         if (objects.size() != 0) {
-            Iterator<AbstractCar> iterator = objects.iterator();
-            for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
-                if (car instanceof Truck && checkPos(car)) move(car);
+            ListIterator<AbstractCar> iterator = objects.listIterator();
+            try {
+                for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
+                    if (car instanceof Truck && checkPos(car)) {
+                        Point p = move(car);
+                        car.setPosition(p);
+                        images.get(car.getId()).setLocation(p);
+
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

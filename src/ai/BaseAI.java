@@ -43,11 +43,7 @@ public abstract class BaseAI extends Thread {
 
     public void run() {
         while (running) {
-//            objects = context.getObjects();
-//            images = context.getImages();
             procces();
-
-           // context.updateObjects(objects, images);
             context.repaintGamePanel();
 
             try {
@@ -56,7 +52,6 @@ public abstract class BaseAI extends Thread {
                 e.printStackTrace();
             }
         }
-
     }
 
     /**
@@ -85,7 +80,7 @@ public abstract class BaseAI extends Thread {
         return Math.acos((a * a + distance * distance - b * b) / (2 * a * distance));
     }
 
-    abstract void move(AbstractCar car);
+    abstract Point move(AbstractCar car);
 
     abstract void procces();
 

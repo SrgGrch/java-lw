@@ -20,6 +20,25 @@ public class PassengerCarAI extends BaseAI {
     }
 
     @Override
+    public void run() {
+        try {
+            sleep(25);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        while (running) {
+            procces();
+            context.repaintGamePanel();
+
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
     double getAngle(AbstractCar car) {
         Point destination = new Point(width, height);
         double a = car.getX() - destination.getX();
@@ -30,27 +49,38 @@ public class PassengerCarAI extends BaseAI {
     }
 
     @Override
-    void move(AbstractCar car) {
+    Point move(AbstractCar car) {
         float newX = car.getX(), newY = car.getY();
         double angle = getAngle(car);
 
         newX -= velocity * Math.cos(angle);
         newY += velocity * Math.sin(angle);
 
-        try {
-            images.get(car.getId()).setLocation(new Point(Math.round(newX), Math.round(newY)));
-            objects.get(objects.indexOf(car)).setPosition(new Point(Math.round(newX), Math.round(newY)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        if (objects.contains(car) && images.containsKey(car.getId())) {
+//            try {
+//                images.get(car.getId()).setLocation(new Point(Math.round(newX), Math.round(newY)));
+//                objects.get(objects.indexOf(car)).setPosition(new Point(Math.round(newX), Math.round(newY)));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+        return new Point(Math.round(newX), Math.round(newY));
     }
 
     @Override
     void procces() {
         if (objects.size() != 0) {
             Iterator<AbstractCar> iterator = objects.iterator();
-            for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
-                if (car instanceof PassengerCar && checkPos(car)) move(car);
+            try {
+                for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
+                    if (car instanceof PassengerCar && checkPos(car)) {
+                        Point p = move(car);
+                        car.setPosition(p);
+                        images.get(car.getId()).setLocation(p);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
