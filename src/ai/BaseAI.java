@@ -1,7 +1,6 @@
 package ai;
 
 import model.AbstractCar;
-import model.Coords;
 import ui.Habitat;
 
 import javax.swing.*;
@@ -12,8 +11,11 @@ import java.util.UUID;
 
 public abstract class BaseAI extends Thread {
 
+
+    private boolean paused = false;
+
     int width, height;
-    int velocity = 5; //px/s
+    int velocity = 2; //px/s
     Habitat context;
     boolean running = true;
     ArrayList<AbstractCar> objects;
@@ -43,14 +45,27 @@ public abstract class BaseAI extends Thread {
 
     public void run() {
         while (running) {
-            procces();
+            synchronized (this) {
+                this.procces();
+            }
             context.repaintGamePanel();
-
             try {
-                sleep(100);
+                if (paused) synchronized (this) {this.wait();}
+                else sleep(45);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void stopAI() {
+        paused = true;
+    }
+
+    public void resumeAI() {
+        paused = false;
+        synchronized (this) {
+            notify();
         }
     }
 

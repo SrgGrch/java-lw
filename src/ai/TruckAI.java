@@ -31,21 +31,21 @@ public class TruckAI extends BaseAI {
     }
 
     @Override
-    public void procces() {
+    synchronized void procces() {
         if (objects.size() != 0) {
-            ListIterator<AbstractCar> iterator = objects.listIterator();
-            try {
-                for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
-                    if (car instanceof Truck && checkPos(car)) {
-                        Point p = move(car);
-                        car.setPosition(p);
-                        images.get(car.getId()).setLocation(p);
+                ListIterator<AbstractCar> iterator = objects.listIterator();
+                try {
+                    for (AbstractCar car = iterator.next(); iterator.hasNext(); car = iterator.next()) {
+                        if (car instanceof Truck && checkPos(car)) {
+                            Point p = move(car);
+                            car.setPosition(p);
+                            images.get(car.getId()).setLocation(p);
 
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
 //        for (AbstractCar car: objects) {

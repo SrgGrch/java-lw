@@ -7,6 +7,7 @@ import java.util.UUID;
 public abstract class AbstractCar implements IBehaviour {
 
     private float x, y; //координаты
+    private int newX, newY;
     private long birthTime, lifetime = 5000;
     private final UUID id = UUID.randomUUID();
 
@@ -14,6 +15,7 @@ public abstract class AbstractCar implements IBehaviour {
     AbstractCar() {
         x = 0;
         y = 0;
+        generateNewCoords();
     }
 
     // констркутор с параметрами, this для доступа к скрытым переменным х и у
@@ -21,6 +23,7 @@ public abstract class AbstractCar implements IBehaviour {
         this.x = x;
         this.y = y;
         this.birthTime = birthTime;
+        generateNewCoords();
     }
 
     public AbstractCar(float x, float y, long birthTime, long lifetime) {
@@ -28,6 +31,13 @@ public abstract class AbstractCar implements IBehaviour {
         this.y = y;
         this.birthTime = birthTime;
         this.lifetime = lifetime;
+        generateNewCoords();
+
+    }
+
+    private void generateNewCoords() {
+        newX = (int) Math.round(Math.random());
+        newY = (int) Math.round(Math.random());
     }
 
     public long getBirthTime() {
@@ -46,7 +56,7 @@ public abstract class AbstractCar implements IBehaviour {
         this.lifetime = lifetime;
     }
 
-    public void setPosition(Point p){
+    public void setPosition(Point p) {
         x = p.x;
         y = p.y;
     }

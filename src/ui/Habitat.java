@@ -28,8 +28,8 @@ public class Habitat extends JFrame {
 
     long carLifeTime = 5000, truckLifeTime = 5000;
 
-    TruckAI truckAI;
-    PassengerCarAI passengerCarAI;
+    private final TruckAI truckAI;
+    private final PassengerCarAI passengerCarAI;
 
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
@@ -61,6 +61,8 @@ public class Habitat extends JFrame {
     private JSpinner carSpinner;
     private JSpinner truckSpinner;
     private JButton statButton;
+    private JCheckBox carAICheckBox;
+    private JCheckBox truckAICheckBox;
     private ButtonGroup buttonGroup;
 
     // конструктор среды
@@ -189,6 +191,9 @@ public class Habitat extends JFrame {
             }
         });
 
+        truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+        passengerCarAI = new PassengerCarAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+
         menuInit();
 
         revalidate();
@@ -250,11 +255,12 @@ public class Habitat extends JFrame {
             return;
         objects.clear();
 
-        truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
-        passengerCarAI = new PassengerCarAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+//        truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+//        passengerCarAI = new PassengerCarAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
         truckAI.start();
         passengerCarAI.start();
 
+        attachListeners();
 
         simTimer = new Timer(); // создаем таймер
         simTimer.schedule(new TimerTask() { //запуск таймера
@@ -273,6 +279,32 @@ public class Habitat extends JFrame {
                 Update(simTime); // обновляем таймер
             }
         }, 0, 1000); // каждую 0,1 секунду запускается update
+    }
+
+    private synchronized void attachListeners() {
+        carAICheckBox.addActionListener(e -> controlCarThread(carAICheckBox.isSelected()));
+
+        truckAICheckBox.addActionListener(e -> controlTruckThread(truckAICheckBox.isSelected()));
+    }
+
+    private synchronized void controlCarThread(boolean checked) {
+        if (checked) {
+            passengerCarAI.stopAI();
+        } else {
+            passengerCarAI.resumeAI();
+        }
+    }
+
+    private synchronized void controlTruckThread(boolean checked) {
+        if (checked) {
+            synchronized (truckAI) {
+                truckAI.stopAI();
+            }
+        } else {
+            synchronized (truckAI) {
+                truckAI.resumeAI();
+            }
+        }
     }
 
     /**
@@ -308,15 +340,15 @@ public class Habitat extends JFrame {
         this.images = images;
     }
 
-    public synchronized ArrayList<AbstractCar> getObjects(){
+    public synchronized ArrayList<AbstractCar> getObjects() {
         return objects;
     }
 
-    public synchronized HashMap<UUID, JLabel> getImages(){
+    public synchronized HashMap<UUID, JLabel> getImages() {
         return images;
     }
 
-    public void repaintGamePanel(){
+    public void repaintGamePanel() {
         gamePanel.repaint();
         gamePanel.revalidate();
     }

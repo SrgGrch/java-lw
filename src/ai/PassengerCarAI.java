@@ -15,27 +15,7 @@ import java.util.UUID;
 public class PassengerCarAI extends BaseAI {
 
     public PassengerCarAI(int width, int height, ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images, Habitat context) {
-
         super(width, height, objects, images, context, "CarAI");
-    }
-
-    @Override
-    public void run() {
-        try {
-            sleep(25);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        while (running) {
-            procces();
-            context.repaintGamePanel();
-
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -68,7 +48,7 @@ public class PassengerCarAI extends BaseAI {
     }
 
     @Override
-    void procces() {
+    synchronized void procces() {
         if (objects.size() != 0) {
             Iterator<AbstractCar> iterator = objects.iterator();
             try {
