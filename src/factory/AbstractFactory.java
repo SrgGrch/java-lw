@@ -15,5 +15,5 @@ public interface AbstractFactory {
 
     Truck createTruck(float x, float y, long birthTime);
 
-    Truck createTruck(float x, float y,  long birthTime, long lifetime);
+    Truck createTruck(float x, float y, long birthTime, long lifetime);
 }

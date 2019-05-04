@@ -50,7 +50,9 @@ public abstract class BaseAI extends Thread {
             }
             context.repaintGamePanel();
             try {
-                if (paused) synchronized (this) {this.wait();}
+                if (paused) synchronized (this) {
+                    this.wait();
+                }
                 else sleep(45);
             } catch (InterruptedException e) {
                 e.printStackTrace();

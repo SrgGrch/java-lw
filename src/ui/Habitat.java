@@ -63,6 +63,7 @@ public class Habitat extends JFrame {
     private JButton statButton;
     private JCheckBox carAICheckBox;
     private JCheckBox truckAICheckBox;
+    private JCheckBox priorCheckBox;
     private ButtonGroup buttonGroup;
 
     // конструктор среды
@@ -255,8 +256,16 @@ public class Habitat extends JFrame {
             return;
         objects.clear();
 
-//        truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
-//        passengerCarAI = new PassengerCarAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
+        priorCheckBox.addActionListener(e -> {
+            if (!priorCheckBox.isSelected()) {
+                passengerCarAI.setPriority(Thread.MAX_PRIORITY);
+                truckAI.setPriority(Thread.MIN_PRIORITY);
+            } else {
+                passengerCarAI.setPriority(Thread.MIN_PRIORITY);
+                truckAI.setPriority(Thread.MAX_PRIORITY);
+            }
+        });
+
         truckAI.start();
         passengerCarAI.start();
 
@@ -288,7 +297,7 @@ public class Habitat extends JFrame {
     }
 
     private synchronized void controlCarThread(boolean checked) {
-        if (checked) {
+        if (!checked) {
             passengerCarAI.stopAI();
         } else {
             passengerCarAI.resumeAI();
@@ -296,7 +305,8 @@ public class Habitat extends JFrame {
     }
 
     private synchronized void controlTruckThread(boolean checked) {
-        if (checked) {
+        if (!
+                checked) {
             synchronized (truckAI) {
                 truckAI.stopAI();
             }

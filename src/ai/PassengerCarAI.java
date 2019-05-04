@@ -2,7 +2,6 @@ package ai;
 
 import model.AbstractCar;
 import model.PassengerCar;
-import model.Truck;
 import ui.Habitat;
 
 import javax.swing.*;
@@ -60,7 +59,7 @@ public class PassengerCarAI extends BaseAI {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

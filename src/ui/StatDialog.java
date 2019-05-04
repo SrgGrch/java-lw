@@ -17,31 +17,31 @@ public class StatDialog {
     private ActionListener okEvent, cancelEvent;
     private JDialog dialog;
 
-    private String[] convertList(ArrayList<AbstractCar> list){
+    private String[] convertList(ArrayList<AbstractCar> list) {
 
         String[] out = new String[list.size()];
         int i = 0;
-        for (AbstractCar car:list) {
+        for (AbstractCar car : list) {
             out[i] = " ";
             out[i] += car.getId().toString() + " " + car.getBirthTime() + " ";
-            out[i++] += (car instanceof Truck)? "Truck ":"PassengerCar ";
+            out[i++] += (car instanceof Truck) ? "Truck " : "PassengerCar ";
         }
         return out;
     }
 
-    public StatDialog(String message, ArrayList<AbstractCar> listToDisplay){
+    public StatDialog(String message, ArrayList<AbstractCar> listToDisplay) {
         list = new JList<>(convertList(listToDisplay));
         list.setFont(new Font("monospaced", Font.PLAIN, 12));
         label = new JLabel(message);
         createAndDisplayOptionPane();
     }
 
-    public StatDialog(String title, String message,  ArrayList<AbstractCar> listToDisplay){
+    public StatDialog(String title, String message, ArrayList<AbstractCar> listToDisplay) {
         this(message, listToDisplay);
         dialog.setTitle(title);
     }
 
-    private void createAndDisplayOptionPane(){
+    private void createAndDisplayOptionPane() {
         setupButtons();
         JPanel pane = layoutComponents();
         optionPane = new JOptionPane(pane);
@@ -50,43 +50,55 @@ public class StatDialog {
         dialog.setBackground(Color.white);
     }
 
-    private void setupButtons(){
+    private void setupButtons() {
         okButton = new JButton("Ок");
         okButton.addActionListener(e -> handleOkButtonClick(e));
     }
 
-    private JPanel layoutComponents(){
+    private JPanel layoutComponents() {
         centerListElements();
-        JPanel panel = new JPanel(new BorderLayout(5,5));
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.add(label, BorderLayout.NORTH);
         panel.add(list, BorderLayout.CENTER);
         return panel;
     }
 
-    private void centerListElements(){
+    private void centerListElements() {
         DefaultListCellRenderer renderer = (DefaultListCellRenderer) list.getCellRenderer();
         renderer.setHorizontalAlignment(SwingConstants.LEFT);
     }
 
-    public void setOnOk(ActionListener event){ okEvent = event; }
-
-    public void setOnClose(ActionListener event){
-        cancelEvent  = event;
+    public void setOnOk(ActionListener event) {
+        okEvent = event;
     }
 
-    private void handleOkButtonClick(ActionEvent e){
-        if(okEvent != null){ okEvent.actionPerformed(e); }
+    public void setOnClose(ActionListener event) {
+        cancelEvent = event;
+    }
+
+    private void handleOkButtonClick(ActionEvent e) {
+        if (okEvent != null) {
+            okEvent.actionPerformed(e);
+        }
         hide();
     }
 
-    private void handleCancelButtonClick(ActionEvent e){
-        if(cancelEvent != null){ cancelEvent.actionPerformed(e);}
+    private void handleCancelButtonClick(ActionEvent e) {
+        if (cancelEvent != null) {
+            cancelEvent.actionPerformed(e);
+        }
         hide();
     }
 
-    public void show(){ dialog.setVisible(true); }
+    public void show() {
+        dialog.setVisible(true);
+    }
 
-    private void hide(){ dialog.setVisible(false); }
+    private void hide() {
+        dialog.setVisible(false);
+    }
 
-    public Object getSelectedItem(){ return list.getSelectedValue(); }
+    public Object getSelectedItem() {
+        return list.getSelectedValue();
+    }
 }
