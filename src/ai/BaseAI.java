@@ -78,14 +78,6 @@ public abstract class BaseAI extends Thread {
         this.velocity = velocity;
     }
 
-    public void updateObjectList(ArrayList<AbstractCar> objects) {
-        this.objects = objects;
-    }
-
-    public void updateObjectList(ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images) {
-        this.objects = objects;
-        this.images = images;
-    }
 
     double getAngle(AbstractCar car) {
 //        Point destination = objectDestinations.get(car.getId());
@@ -101,9 +93,6 @@ public abstract class BaseAI extends Thread {
 
     abstract void procces();
 
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
 
     /**
      * @return true - объект находится вне конечной области, false - объект в конечной области
