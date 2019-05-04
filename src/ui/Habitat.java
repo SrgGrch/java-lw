@@ -305,15 +305,10 @@ public class Habitat extends JFrame {
     }
 
     private synchronized void controlTruckThread(boolean checked) {
-        if (!
-                checked) {
-            synchronized (truckAI) {
-                truckAI.stopAI();
-            }
+        if (!checked) {
+            truckAI.stopAI();
         } else {
-            synchronized (truckAI) {
-                truckAI.resumeAI();
-            }
+            truckAI.resumeAI();
         }
     }
 
