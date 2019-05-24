@@ -19,8 +19,6 @@ public class Habitat extends JFrame {
 
     private enum CarType {CAR, TRUCK}
 
-    private int JFwidth, JFheight; // размер рабочей области
-
     private ArrayList<AbstractCar> objects; //массив объектов
     private HashMap<UUID, JLabel> images = new HashMap<>();
     private TreeSet<UUID> uuidTree = new TreeSet<>();
@@ -52,11 +50,11 @@ public class Habitat extends JFrame {
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
     private JPanel radioGroup;
-    private JComboBox carPerComboBox;
+    private JComboBox<String> carPerComboBox;
     private JSlider carProbSlider;
     private JPanel carPanel;
     private JPanel truckPanel;
-    private JComboBox truckPerComboBox;
+    private JComboBox<String> truckPerComboBox;
     private JSlider truckProbSlider;
     private JSpinner carSpinner;
     private JSpinner truckSpinner;
@@ -68,8 +66,6 @@ public class Habitat extends JFrame {
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
-        this.JFwidth = JFwidth; // ширина
-        this.JFheight = JFheight; // выоста
         this.carGenTime = carGenTime; // время генерации каждые N секунд
         this.truckGenTime = truckGenTime;
         this.carProb = carProb; // веротяность генерации
@@ -95,16 +91,10 @@ public class Habitat extends JFrame {
         gamePanel.repaint();
 
         showInfo.setSelected(true);
-        showInfo.addActionListener(e -> {
-            timerLabel.setVisible(true);
-            //hideInfo.setSelected(false);
-        });
+        showInfo.addActionListener(e -> timerLabel.setVisible(true));
 
         hideInfo.setSelected(false);
-        hideInfo.addActionListener(e -> {
-            timerLabel.setVisible(false);
-            //showInfo.setSelected(false);
-        });
+        hideInfo.addActionListener(e -> timerLabel.setVisible(false));
 
         startButton.setEnabled(true);
         startButton.addActionListener(e -> startSim());
@@ -338,19 +328,6 @@ public class Habitat extends JFrame {
             gamePanel.removeAll();
             gamePanel.revalidate();
         }
-    }
-
-    public synchronized void updateObjects(ArrayList<AbstractCar> objects, HashMap<UUID, JLabel> images) {
-        this.objects = objects;
-        this.images = images;
-    }
-
-    public synchronized ArrayList<AbstractCar> getObjects() {
-        return objects;
-    }
-
-    public synchronized HashMap<UUID, JLabel> getImages() {
-        return images;
     }
 
     public void repaintGamePanel() {
