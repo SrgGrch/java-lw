@@ -75,7 +75,7 @@ public class Habitat extends JFrame {
         this.carProb = carProb; // веротяность генерации
         this.truckProb = truckProb;
 
-        setTitle("Гречишников ЛР3");
+        setTitle("Гречишников ЛР4");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(JFwidth, JFheight); //размер
         setContentPane(rootPanel); //добавляем панель
