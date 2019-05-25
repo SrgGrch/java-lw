@@ -78,6 +78,9 @@ public abstract class BaseAI extends Thread {
         this.velocity = velocity;
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
 
     double getAngle(AbstractCar car) {
 //        Point destination = objectDestinations.get(car.getId());
@@ -92,6 +95,7 @@ public abstract class BaseAI extends Thread {
     abstract Point move(AbstractCar car);
 
     abstract void procces();
+
 
 
     /**

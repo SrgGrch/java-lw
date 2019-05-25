@@ -19,7 +19,43 @@ import java.util.*;
 // среда рабочей области
 public class Habitat extends JFrame {
 
-    private enum CarType {CAR, TRUCK}
+    void stopAICommand(String type) {
+        switch (type) {
+            case "car": {
+                controlCarThread(false);
+                carAICheckBox.setSelected(false);
+            }
+            break;
+            case "truck": {
+                controlTruckThread(false);
+                truckAICheckBox.setSelected(false);
+            }
+            break;
+        }
+    }
+
+    void startAICommand(String type) {
+        switch (type) {
+            case "car": {
+                if(passengerCarAI.isPaused()) {
+                    controlCarThread(true);
+                    carAICheckBox.setSelected(true);
+                }
+            }
+            break;
+            case "truck": {
+                if(truckAI.isPaused()){
+                    controlTruckThread(true);
+                    truckAICheckBox.setSelected(true);
+                }
+            }
+            break;
+        }
+    }
+
+    private enum CarType {
+        CAR, TRUCK
+    }
 
     private ArrayList<AbstractCar> objects; //массив объектов
     private HashMap<UUID, JLabel> images = new HashMap<>();
@@ -214,6 +250,8 @@ public class Habitat extends JFrame {
         });
 
 
+        ConsoleDialog cd = new ConsoleDialog(this);
+
         menuInit();
 
         revalidate();
@@ -283,7 +321,7 @@ public class Habitat extends JFrame {
     private void loadObjects() {
         JFileChooser c = new JFileChooser();
         // Demonstrate "Open" dialog:
-        if (c.showOpenDialog(this) == 0){
+        if (c.showOpenDialog(this) == 0) {
             String path = c.getSelectedFile().getPath();
             System.out.println(path);
             try {
@@ -298,7 +336,7 @@ public class Habitat extends JFrame {
                 images.clear();
                 birthTimeMap.clear();
 
-                for (AbstractCar car:objects) {
+                for (AbstractCar car : objects) {
                     addCar(car);
                 }
 
@@ -311,7 +349,7 @@ public class Habitat extends JFrame {
     }
 
     private void fixLoadedObjects(ArrayList<AbstractCar> tmp) {
-        for (AbstractCar car: tmp) {
+        for (AbstractCar car : tmp) {
             car.setBirthTime(simTime);
         }
     }
