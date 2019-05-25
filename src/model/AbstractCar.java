@@ -1,10 +1,11 @@
 package model;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.UUID;
 
 // абстрактный класс, реализующий интерфейс
-public abstract class AbstractCar implements IBehaviour {
+public abstract class AbstractCar implements IBehaviour, Serializable {
 
     private float x, y; //координаты
     private int newX, newY;

@@ -2,6 +2,7 @@ package ui;
 
 import ai.PassengerCarAI;
 import ai.TruckAI;
+import core.PictureLoader;
 import factory.ConcreteFactory;
 import model.AbstractCar;
 import model.Truck;
@@ -11,6 +12,7 @@ import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.*;
 import java.util.Timer;
 import java.util.*;
 
@@ -28,6 +30,8 @@ public class Habitat extends JFrame {
 
     private final TruckAI truckAI;
     private final PassengerCarAI passengerCarAI;
+
+    Properties properties = new Properties();
 
     private ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
@@ -49,7 +53,6 @@ public class Habitat extends JFrame {
     private JLabel timerLabel;
     private JRadioButton showInfo;
     private JRadioButton hideInfo;
-    private JPanel radioGroup;
     private JComboBox<String> carPerComboBox;
     private JSlider carProbSlider;
     private JPanel carPanel;
@@ -62,16 +65,19 @@ public class Habitat extends JFrame {
     private JCheckBox carAICheckBox;
     private JCheckBox truckAICheckBox;
     private JCheckBox priorCheckBox;
+    private JPanel radioGroup;
     private ButtonGroup buttonGroup;
 
     // конструктор среды
-    public Habitat(int JFwidth, int JFheight, float carGenTime, float truckGenTime, float carProb, float truckProb) {
-        this.carGenTime = carGenTime; // время генерации каждые N секунд
-        this.truckGenTime = truckGenTime;
-        this.carProb = carProb; // веротяность генерации
-        this.truckProb = truckProb;
+    public Habitat(int JFwidth, int JFheight, float carGenTimeIn, float truckGenTimeIn, float carProbIn, float truckProbIn) {
+        this.carGenTime = carGenTimeIn; // время генерации каждые N секунд
+        this.truckGenTime = truckGenTimeIn;
+        this.carProb = carProbIn; // веротяность генерации
+        this.truckProb = truckProbIn;
 
-        setTitle("Гречишников ЛР4");
+        readProps();
+
+        setTitle("Гречишников ЛР5");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(JFwidth, JFheight); //размер
         setContentPane(rootPanel); //добавляем панель
@@ -185,17 +191,70 @@ public class Habitat extends JFrame {
         truckAI = new TruckAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
         passengerCarAI = new PassengerCarAI(gamePanel.getWidth(), gamePanel.getHeight(), objects, images, this);
 
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                properties.put("carProb", Float.toString(carProb));
+                properties.put("truckProb", Float.toString(truckProb));
+                properties.put("carGenTime", Float.toString(carGenTime));
+                properties.put("truckGenTime", Float.toString(truckGenTime));
+                properties.put("carLifeTime", Long.toString(carLifeTime));
+                properties.put("truckLifeTime", Long.toString(truckLifeTime));
+                properties.put("carAi", Boolean.toString(carAICheckBox.isSelected()));
+                properties.put("truckAi", Boolean.toString(truckAICheckBox.isSelected()));
+//                properties.put("simTime", radioGroup.)
+                try {
+                    properties.store(new FileOutputStream("config.prop"), " ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
         menuInit();
 
         revalidate();
         repaint();
     }
 
+    private void saveObjects(){
+        try {
+            FileOutputStream fos = new FileOutputStream("temp.out");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(objects);
+            oos.flush();
+            oos.close();
+            System.out.println("DONE");
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void readProps() {
+
+        try {
+            properties.load(new FileInputStream("config.prop"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        carProb = Float.parseFloat((String) properties.get("carProb"));
+        truckProb = Float.parseFloat((String) properties.get("truckProb"));
+        carGenTime = Float.parseFloat((String) properties.get("carGenTime"));
+        truckGenTime = Float.parseFloat((String) properties.get("truckGenTime"));
+        carLifeTime = Long.parseLong((String) properties.get("carLifeTime"));
+        truckLifeTime = Long.parseLong((String) properties.get("truckLifeTime"));
+        carAICheckBox.setSelected(Boolean.parseBoolean((String) properties.get("carAi")));
+        truckAICheckBox.setSelected(Boolean.parseBoolean((String) properties.get("truckAi")));
+
+    }
+
     private void setGenTime(int selectedIndex, CarType carType) {
         if (CarType.CAR == carType) carGenTime = selectedIndex;
         else truckGenTime = selectedIndex;
     }
-
     private void setProb(int value, CarType carType) {
         if (CarType.CAR == carType) carProb = ((float) value) / 10;
         else truckProb = ((float) value) / 10;
@@ -205,6 +264,7 @@ public class Habitat extends JFrame {
     private void menuInit() {
         JMenuBar menuBar = new JMenuBar();
         JMenu simMenu = new JMenu("Simulation");
+        JMenu objMenu = new JMenu("Objects");
 
         JMenuItem startSimItem = new JMenuItem("Start simulation");
         startSimItem.addActionListener(e -> startSim());
@@ -212,9 +272,20 @@ public class Habitat extends JFrame {
         JMenuItem stopSimItem = new JMenuItem("Stop simulation");
         stopSimItem.addActionListener(e -> stopSim());
 
+        JMenuItem saveObjects = new JMenuItem("Save objects");
+        saveObjects.addActionListener(e -> saveObjects());
+
+        JMenuItem loadObjects = new JMenuItem("Load objects");
+        loadObjects.addActionListener(e -> stopSim());
+
         simMenu.add(startSimItem);
         simMenu.add(stopSimItem);
+
+        objMenu.add(saveObjects);
+        objMenu.add(loadObjects);
+
         menuBar.add(simMenu);
+        menuBar.add(objMenu);
 
         setJMenuBar(menuBar);
     }
@@ -256,8 +327,11 @@ public class Habitat extends JFrame {
             }
         });
 
-        truckAI.start();
-        passengerCarAI.start();
+        truckAI.stop();
+        passengerCarAI.stop();
+
+        controlCarThread(carAICheckBox.isSelected());
+        controlTruckThread(truckAICheckBox.isSelected());
 
         attachListeners();
 
@@ -322,6 +396,9 @@ public class Habitat extends JFrame {
             carTime = 0;
             truckTime = 0;
 
+            truckAI.interrupt();
+            passengerCarAI.interrupt();
+
             images.clear();
 
             firstRun = true;
@@ -372,9 +449,9 @@ public class Habitat extends JFrame {
     }
 
     private void addCar(AbstractCar car) {
-        JLabel tmp = new JLabel(new ImageIcon(car.getImage()));
+        JLabel tmp = new JLabel(new ImageIcon(PictureLoader.load(car)));
 
-        tmp.setSize(car.getImage().getWidth(), car.getImage().getHeight());
+        tmp.setSize(PictureLoader.load(car).getWidth(), PictureLoader.load(car).getHeight());
         tmp.setLocation(Math.round(car.getX()), Math.round(car.getY()));
         gamePanel.add(tmp);
         images.put(car.getId(), tmp);
