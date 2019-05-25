@@ -39,6 +39,8 @@ public class Habitat extends JFrame {
     private float carTime, truckTime; // время последней генерации объекта
     private int PassengerCarNum, TruckNum; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
+    long simTime;
+
     private Timer simTimer;
     private long firstTime;
     private boolean firstRun = true;
@@ -218,19 +220,6 @@ public class Habitat extends JFrame {
         repaint();
     }
 
-    private void saveObjects(){
-        try {
-            FileOutputStream fos = new FileOutputStream("temp.out");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(objects);
-            oos.flush();
-            oos.close();
-            System.out.println("DONE");
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
     private void readProps() {
 
         try {
@@ -255,6 +244,7 @@ public class Habitat extends JFrame {
         if (CarType.CAR == carType) carGenTime = selectedIndex;
         else truckGenTime = selectedIndex;
     }
+
     private void setProb(int value, CarType carType) {
         if (CarType.CAR == carType) carProb = ((float) value) / 10;
         else truckProb = ((float) value) / 10;
@@ -276,7 +266,7 @@ public class Habitat extends JFrame {
         saveObjects.addActionListener(e -> saveObjects());
 
         JMenuItem loadObjects = new JMenuItem("Load objects");
-        loadObjects.addActionListener(e -> stopSim());
+        loadObjects.addActionListener(e -> loadObjects());
 
         simMenu.add(startSimItem);
         simMenu.add(stopSimItem);
@@ -290,6 +280,61 @@ public class Habitat extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    private void loadObjects() {
+        JFileChooser c = new JFileChooser();
+        // Demonstrate "Open" dialog:
+        if (c.showOpenDialog(this) == 0){
+            String path = c.getSelectedFile().getPath();
+            System.out.println(path);
+            try {
+                FileInputStream fos = new FileInputStream(path);
+                ObjectInputStream oos = new ObjectInputStream(fos);
+                ArrayList<AbstractCar> tmp = (ArrayList<AbstractCar>) oos.readObject();
+                fixLoadedObjects(tmp);
+                objects.clear();
+                objects.addAll(tmp);
+                gamePanel.removeAll();
+                uuidTree.clear();
+                images.clear();
+                birthTimeMap.clear();
+
+                for (AbstractCar car:objects) {
+                    addCar(car);
+                }
+
+                oos.close();
+                System.out.println("DONE");
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void fixLoadedObjects(ArrayList<AbstractCar> tmp) {
+        for (AbstractCar car: tmp) {
+            car.setBirthTime(simTime);
+        }
+    }
+
+
+    private void saveObjects() {
+        JFileChooser c = new JFileChooser();
+        // Demonstrate "Open" dialog:
+        if (c.showOpenDialog(this) == 0) {
+            String path = c.getSelectedFile().getPath();
+            System.out.println(path);
+            try {
+                FileOutputStream fos = new FileOutputStream(path);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(objects);
+                oos.flush();
+                oos.close();
+                System.out.println("DONE");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Функция возвращающая диалог окончания симуляции
@@ -327,11 +372,11 @@ public class Habitat extends JFrame {
             }
         });
 
-        truckAI.stop();
-        passengerCarAI.stop();
-
         controlCarThread(carAICheckBox.isSelected());
         controlTruckThread(truckAICheckBox.isSelected());
+
+        passengerCarAI.start();
+        truckAI.start();
 
         attachListeners();
 
@@ -345,7 +390,7 @@ public class Habitat extends JFrame {
                 }
 
                 long currentTime = System.currentTimeMillis();
-                long simTime = (currentTime - firstTime); // время прошедшее с начала симуляции
+                simTime = (currentTime - firstTime); // время прошедшее с начала симуляции
 
                 timerLabel.setText("Время: " + Math.round(simTime / 1000.f) + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
 
@@ -396,8 +441,9 @@ public class Habitat extends JFrame {
             carTime = 0;
             truckTime = 0;
 
-            truckAI.interrupt();
-            passengerCarAI.interrupt();
+
+            truckAI.stop();
+            passengerCarAI.stop();
 
             images.clear();
 
