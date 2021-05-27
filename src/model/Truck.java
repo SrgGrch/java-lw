@@ -1,9 +1,6 @@
 package model;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.UUID;
 
 public class Truck extends AbstractCar {
 
@@ -17,6 +14,10 @@ public class Truck extends AbstractCar {
 
     public Truck(float x, float y, long birthTime, long lifetime) {
         super(x, y, birthTime, lifetime);
+    }
+
+    public Truck(UUID id, float x, float y, long birthTime, long lifetime) {
+        super(id, x, y, birthTime, lifetime);
     }
 
 

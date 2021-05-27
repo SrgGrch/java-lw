@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class StatDialog {
-    private JList list;
-    private JLabel label;
+    private final JList list;
+    private final JLabel label;
     private JOptionPane optionPane;
     private JButton okButton;
     private ActionListener okEvent, cancelEvent;

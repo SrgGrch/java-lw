@@ -3,6 +3,7 @@ package ui;
 import ai.PassengerCarAI;
 import ai.TruckAI;
 import core.PictureLoader;
+import data.DBHelper;
 import factory.ConcreteFactory;
 import model.AbstractCar;
 import model.Truck;
@@ -18,6 +19,8 @@ import java.util.*;
 
 // среда рабочей области
 public class Habitat extends JFrame {
+
+    private final DBHelper dbHelper = new DBHelper();
 
     void stopAICommand(String type) {
         switch (type) {
@@ -37,14 +40,14 @@ public class Habitat extends JFrame {
     void startAICommand(String type) {
         switch (type) {
             case "car": {
-                if(passengerCarAI.isPaused()) {
+                if (passengerCarAI.isPaused()) {
                     controlCarThread(true);
                     carAICheckBox.setSelected(true);
                 }
             }
             break;
             case "truck": {
-                if(truckAI.isPaused()){
+                if (truckAI.isPaused()) {
                     controlTruckThread(true);
                     truckAICheckBox.setSelected(true);
                 }
@@ -57,10 +60,10 @@ public class Habitat extends JFrame {
         CAR, TRUCK
     }
 
-    private ArrayList<AbstractCar> objects; //массив объектов
-    private HashMap<UUID, JLabel> images = new HashMap<>();
-    private TreeSet<UUID> uuidTree = new TreeSet<>();
-    private HashMap<UUID, Long> birthTimeMap = new HashMap<>();
+    private final ArrayList<AbstractCar> objects; //массив объектов
+    private final HashMap<UUID, JLabel> images = new HashMap<>();
+    private final TreeSet<UUID> uuidTree = new TreeSet<>();
+    private final HashMap<UUID, Long> birthTimeMap = new HashMap<>();
 
     long carLifeTime = 5000, truckLifeTime = 5000;
 
@@ -69,9 +72,9 @@ public class Habitat extends JFrame {
 
     Properties properties = new Properties();
 
-    private ConcreteFactory factory;
+    private final ConcreteFactory factory;
     private float carGenTime, truckGenTime, carProb, truckProb; //N - время генерации объекта, P - вероятность генерации
-    private long timeFromStart = 0; //время начала генерации объектов
+    private final long timeFromStart = 0; //время начала генерации объектов
     private float carTime, truckTime; // время последней генерации объекта
     private int PassengerCarNum, TruckNum; // кол-во объектов класса PassengerCarNum, объектов класса TruckNum
 
@@ -104,7 +107,7 @@ public class Habitat extends JFrame {
     private JCheckBox truckAICheckBox;
     private JCheckBox priorCheckBox;
     private JPanel radioGroup;
-    private ButtonGroup buttonGroup;
+    private final ButtonGroup buttonGroup;
 
     // конструктор среды
     public Habitat(int JFwidth, int JFheight, float carGenTimeIn, float truckGenTimeIn, float carProbIn, float truckProbIn) {
@@ -115,7 +118,7 @@ public class Habitat extends JFrame {
 
         readProps();
 
-        setTitle("Гречишников ЛР5");
+        setTitle("Скакалина Исаенко ЛР5");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(JFwidth, JFheight); //размер
         setContentPane(rootPanel); //добавляем панель
@@ -217,11 +220,7 @@ public class Habitat extends JFrame {
                     stopSim();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_T) {  //нажата T, показать/скрыть статистику
-                    if (timerLabel.isVisible()) {
-                        timerLabel.setVisible(false);
-                    } else {
-                        timerLabel.setVisible(true);
-                    }
+                    timerLabel.setVisible(!timerLabel.isVisible());
                 }
             }
         });
@@ -249,17 +248,17 @@ public class Habitat extends JFrame {
             }
         });
 
-
-        ConsoleDialog cd = new ConsoleDialog(this);
-
         menuInit();
 
         revalidate();
         repaint();
     }
 
-    private void readProps() {
+    private void showConsole() {
+        new ConsoleDialog(this);
+    }
 
+    private void readProps() { //конфигурационный файл
         try {
             properties.load(new FileInputStream("config.prop"));
         } catch (IOException e) {
@@ -289,7 +288,7 @@ public class Habitat extends JFrame {
     }
 
 
-    private void menuInit() {
+    private void menuInit() { //загрузить и сохранить
         JMenuBar menuBar = new JMenuBar();
         JMenu simMenu = new JMenu("Simulation");
         JMenu objMenu = new JMenu("Objects");
@@ -300,17 +299,39 @@ public class Habitat extends JFrame {
         JMenuItem stopSimItem = new JMenuItem("Stop simulation");
         stopSimItem.addActionListener(e -> stopSim());
 
+        JMenuItem showConsole = new JMenuItem("Show console");
+        showConsole.addActionListener(e -> showConsole());
+
         JMenuItem saveObjects = new JMenuItem("Save objects");
         saveObjects.addActionListener(e -> saveObjects());
 
         JMenuItem loadObjects = new JMenuItem("Load objects");
         loadObjects.addActionListener(e -> loadObjects());
 
+        JMenuItem saveObjectsToDb = new JMenuItem("Save objects to DB");
+        saveObjectsToDb.addActionListener(e -> dbHelper.saveObjects(objects));
+
+        JMenuItem loadObjectsToDb = new JMenuItem("Load objects to DB");
+        loadObjectsToDb.addActionListener(e -> {
+            objects.clear();
+            objects.addAll(dbHelper.loadObjects());
+
+            gamePanel.removeAll();
+            uuidTree.clear();
+            images.clear();
+            birthTimeMap.clear();
+
+            objects.forEach(car -> addCar(car));
+        });
+
         simMenu.add(startSimItem);
         simMenu.add(stopSimItem);
+        simMenu.add(showConsole);
 
         objMenu.add(saveObjects);
         objMenu.add(loadObjects);
+        objMenu.add(saveObjectsToDb);
+        objMenu.add(loadObjectsToDb);
 
         menuBar.add(simMenu);
         menuBar.add(objMenu);

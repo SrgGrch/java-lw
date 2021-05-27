@@ -10,13 +10,12 @@ public abstract class AbstractCar implements IBehaviour, Serializable {
     private float x, y; //координаты
     private int newX, newY;
     private long birthTime, lifetime = 5000;
-    private final UUID id = UUID.randomUUID();
+    private UUID id = UUID.randomUUID();
 
     // констркутор без параметров
     AbstractCar() {
         x = 0;
         y = 0;
-        generateNewCoords();
     }
 
     // констркутор с параметрами, this для доступа к скрытым переменным х и у
@@ -24,7 +23,6 @@ public abstract class AbstractCar implements IBehaviour, Serializable {
         this.x = x;
         this.y = y;
         this.birthTime = birthTime;
-        generateNewCoords();
     }
 
     public AbstractCar(float x, float y, long birthTime, long lifetime) {
@@ -32,13 +30,15 @@ public abstract class AbstractCar implements IBehaviour, Serializable {
         this.y = y;
         this.birthTime = birthTime;
         this.lifetime = lifetime;
-        generateNewCoords();
 
     }
 
-    private void generateNewCoords() {
-        newX = (int) Math.round(Math.random());
-        newY = (int) Math.round(Math.random());
+    public AbstractCar(UUID id, float x, float y, long birthTime, long lifetime) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.birthTime = birthTime;
+        this.lifetime = lifetime;
     }
 
     public long getBirthTime() {

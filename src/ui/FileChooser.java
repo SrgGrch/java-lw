@@ -6,11 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FileChooser extends JFrame {
-    private JTextField filename = new JTextField(), dir = new JTextField();
+    private final JTextField filename = new JTextField();
+    private final JTextField dir = new JTextField();
 
-    private JButton open = new JButton("Open"), save = new JButton("Save");
+    private final JButton open = new JButton("Open");
+    private final JButton save = new JButton("Save");
 
-    public FileChooser() {
+    public FileChooser() { //файловый диалог
         JPanel p = new JPanel();
         open.addActionListener(new OpenL());
         p.add(open);

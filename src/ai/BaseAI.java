@@ -16,8 +16,8 @@ public abstract class BaseAI extends Thread {
 
     int width, height;
     int velocity = 2; //px/s
-    private Habitat context;
-    private boolean running = true;
+    private final Habitat context;
+    private final boolean running = true;
     ArrayList<AbstractCar> objects;
     HashMap<UUID, JLabel> images;
     HashMap<UUID, Point> objectDestinations = new HashMap<>();
@@ -95,7 +95,6 @@ public abstract class BaseAI extends Thread {
     abstract Point move(AbstractCar car);
 
     abstract void procces();
-
 
 
     /**

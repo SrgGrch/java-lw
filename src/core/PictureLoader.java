@@ -10,10 +10,10 @@ import java.io.IOException;
 
 public class PictureLoader {
 
-    public static BufferedImage load(AbstractCar car){
+    public static BufferedImage load(AbstractCar car) {
         BufferedImage img = null;
 
-        if (car instanceof PassengerCar){
+        if (car instanceof PassengerCar) {
             try {
                 img = ImageIO.read(new File("passengercar.png"));
             } catch (IOException ex) {

@@ -8,19 +8,18 @@ import java.awt.event.KeyListener;
 
 public class ConsoleDialog extends JDialog implements KeyListener {
 
-    private Habitat context;
+    private final Habitat context;
 
     JTextArea textArea = null;
 
-    ConsoleDialog(Habitat context) {
+    ConsoleDialog(Habitat context) { //команда "консоль"
         super(context, "Console");
         this.context = context;
         JPanel consolePanel = new JPanel();
         textArea = new JTextArea(25, 100);
+        setSize(800, 400);
         JScrollPane scrollPane = new JScrollPane(textArea);
         textArea.setEditable(true);
-//        textArea.append("Application console\n");
-//        textArea.setCaretPosition(textArea.get);
 
         consolePanel.add(scrollPane);
 
@@ -38,7 +37,7 @@ public class ConsoleDialog extends JDialog implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        if (e.getKeyChar() == KeyEvent.VK_ENTER){
+        if (e.getKeyChar() == KeyEvent.VK_ENTER) {
             sendLine();
         }
     }
@@ -54,19 +53,23 @@ public class ConsoleDialog extends JDialog implements KeyListener {
                 start = Utilities.getRowStart(textArea, end);
             }
             String text = textArea.getText(start, end - start);
-            switch (text){
-                case "start carAI": {
+            switch (text) {
+                case "start carAI": { //команды
                     context.startAICommand("car");
-                } break;
+                }
+                break;
                 case "stop carAI": {
                     context.stopAICommand("car");
-                } break;
+                }
+                break;
                 case "start truckAI": {
                     context.startAICommand("truck");
-                }break;
+                }
+                break;
                 case "stop truckAI": {
                     context.stopAICommand("truck");
-                }break;
+                }
+                break;
                 default: {
                     textArea.append("wrong command\n");
                 }
