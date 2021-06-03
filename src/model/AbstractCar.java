@@ -2,6 +2,7 @@ package model;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 // абстрактный класс, реализующий интерфейс
@@ -72,5 +73,44 @@ public abstract class AbstractCar implements IBehaviour, Serializable {
 
     public float getY() {
         return y;
+    }
+
+    static final int SIZE = Integer.BYTES + Float.BYTES + Float.BYTES + Long.BYTES + Long.BYTES + Long.BYTES * 2;
+
+    public byte[] toBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(SIZE);
+        buffer.putInt(this instanceof Truck ? 1 : 0);
+        buffer.putFloat(getX());
+        buffer.putFloat(getY());
+        buffer.putLong(getBirthTime());
+        buffer.putLong(getLifetime());
+        buffer.putLong(getId().getMostSignificantBits());
+        buffer.putLong(getId().getLeastSignificantBits());
+        return buffer.array();
+    }
+
+    public static AbstractCar fromBytes(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        int type = buffer.getInt();
+        AbstractCar car;
+        if (type == 1) {
+            car = new Truck(
+                    new UUID(buffer.getLong(), buffer.getLong()),
+                    buffer.getFloat(),
+                    buffer.getFloat(),
+                    buffer.getLong(),
+                    buffer.getLong()
+            );
+        } else {
+            car = new PassengerCar(
+                    new UUID(buffer.getLong(), buffer.getLong()),
+                    buffer.getFloat(),
+                    buffer.getFloat(),
+                    buffer.getLong(),
+                    buffer.getLong()
+            );
+        }
+
+        return car;
     }
 }

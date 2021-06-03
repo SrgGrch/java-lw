@@ -5,8 +5,7 @@ import ai.TruckAI;
 import core.PictureLoader;
 import data.DBHelper;
 import factory.ConcreteFactory;
-import model.AbstractCar;
-import model.Truck;
+import model.*;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
@@ -14,6 +13,9 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Timer;
 import java.util.*;
 
@@ -21,6 +23,8 @@ import java.util.*;
 public class Habitat extends JFrame {
 
     private final DBHelper dbHelper = new DBHelper();
+    private final Socket socket;
+    private final List<UUID> clients = new ArrayList<>();
 
     void stopAICommand(String type) {
         switch (type) {
@@ -110,7 +114,7 @@ public class Habitat extends JFrame {
     private final ButtonGroup buttonGroup;
 
     // конструктор среды
-    public Habitat(int JFwidth, int JFheight, float carGenTimeIn, float truckGenTimeIn, float carProbIn, float truckProbIn) {
+    public Habitat(int JFwidth, int JFheight, float carGenTimeIn, float truckGenTimeIn, float carProbIn, float truckProbIn) throws IOException {
         this.carGenTime = carGenTimeIn; // время генерации каждые N секунд
         this.truckGenTime = truckGenTimeIn;
         this.carProb = carProbIn; // веротяность генерации
@@ -252,6 +256,70 @@ public class Habitat extends JFrame {
 
         revalidate();
         repaint();
+
+        socket = new Socket("localhost", 1984);
+
+        Thread socketThread = new Thread(() -> {
+            while (true) {
+                try {
+                    BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
+                    List<Byte> bytes = new ArrayList<>();
+                    while (reader.available() > 0) {
+                        bytes.add((byte) reader.read());
+                    }
+
+                    if (bytes.size() > 0) {
+                        byte[] byteArray = new byte[bytes.size()];
+                        for (int i = 0; i < bytes.size(); i++) {
+                            byteArray[i] = bytes.get(i);
+                        }
+                        ByteBuffer buffer = ByteBuffer.wrap(byteArray);
+                        int type = buffer.getInt();
+                        if (type == NewClientMessage.TYPE) {
+                            byte[] newArray = new byte[buffer.array().length - buffer.position()];
+                            buffer.get(newArray, buffer.arrayOffset(), newArray.length);
+
+                            NewClientMessage message = new NewClientMessage(newArray);
+                            clients.add(message.getId());
+
+                            System.out.println("New client: " + message.getId());
+                        } else if (type == RemoveClientMessage.TYPE) {
+                            byte[] newArray = new byte[buffer.array().length - buffer.position()];
+                            buffer.get(newArray, buffer.arrayOffset(), newArray.length);
+
+                            NewClientMessage message = new NewClientMessage(newArray);
+                            clients.remove(message.getId());
+
+                            System.out.println("Del client: " + message.getId());
+                        } else if (type == ClientsMessage.TYPE) {
+                            byte[] newArray = new byte[buffer.array().length - buffer.position()];
+                            buffer.get(newArray);
+
+                            ClientsMessage message = new ClientsMessage(newArray);
+                            clients.addAll(message.getIds());
+                        } else if (type == SendCarsResponse.TYPE) {
+                            byte[] newArray = new byte[buffer.array().length - buffer.position()];
+                            buffer.get(newArray, buffer.arrayOffset(), newArray.length);
+
+                            SendCarsResponse message = new SendCarsResponse(newArray);
+                            objects.clear();
+                            objects.addAll(message.getCars());
+
+                            gamePanel.removeAll();
+                            uuidTree.clear();
+                            images.clear();
+                            birthTimeMap.clear();
+
+                            objects.forEach(this::addCar);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        socketThread.start();
     }
 
     private void showConsole() {
@@ -321,7 +389,12 @@ public class Habitat extends JFrame {
             images.clear();
             birthTimeMap.clear();
 
-            objects.forEach(car -> addCar(car));
+            objects.forEach(this::addCar);
+        });
+
+        JMenuItem sendObject = new JMenuItem("Send objects");
+        sendObject.addActionListener(e -> {
+            new SendDialog(this, socket, clients, objects);
         });
 
         simMenu.add(startSimItem);
@@ -332,6 +405,7 @@ public class Habitat extends JFrame {
         objMenu.add(loadObjects);
         objMenu.add(saveObjectsToDb);
         objMenu.add(loadObjectsToDb);
+        objMenu.add(sendObject);
 
         menuBar.add(simMenu);
         menuBar.add(objMenu);

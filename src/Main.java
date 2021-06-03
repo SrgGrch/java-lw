@@ -1,6 +1,7 @@
 import ui.Habitat;
 
 import javax.swing.*;
+import java.io.IOException;
 
 //Первоначальный класс
 public class Main {
@@ -15,7 +16,11 @@ public class Main {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        Habitat habitat = new Habitat(800, 600, 1, 2, 0.5f, 0.5f);
+        try {
+            Habitat habitat = new Habitat(800, 600, 1, 2, 0.5f, 0.5f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //habitat.Init();//инициализация среды
 
     }
