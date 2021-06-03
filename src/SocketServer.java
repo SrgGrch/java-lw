@@ -22,6 +22,7 @@ public class SocketServer {
     }
 
     public SocketServer() throws IOException {
+        System.out.println("Server started");
         Map<UUID, Socket> sockets = new HashMap<>();
 
         Thread socketThread = new Thread(() -> {
