@@ -1,10 +1,10 @@
 # 
-#Fri Jun 04 04:17:40 NOVT 2021
+#Fri Jun 04 04:44:50 NOVT 2021
 carGenTime=1.0
-carAi=true
+carAi=false
 truckProb=1.0
 truckGenTime=1.0
-truckLifeTime=5000
-truckAi=true
-carLifeTime=6000
+truckLifeTime=40000
+truckAi=false
+carLifeTime=40000
 carProb=1.0

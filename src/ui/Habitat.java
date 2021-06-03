@@ -66,8 +66,6 @@ public class Habitat extends JFrame {
 
     private final ArrayList<AbstractCar> objects; //массив объектов
     private final HashMap<UUID, JLabel> images = new HashMap<>();
-    private final TreeSet<UUID> uuidTree = new TreeSet<>();
-    private final HashMap<UUID, Long> birthTimeMap = new HashMap<>();
 
     long carLifeTime = 5000, truckLifeTime = 5000;
 
@@ -306,11 +304,11 @@ public class Habitat extends JFrame {
                             objects.addAll(message.getCars());
 
                             gamePanel.removeAll();
-                            uuidTree.clear();
                             images.clear();
-                            birthTimeMap.clear();
 
                             objects.forEach(this::addCar);
+
+                            repaintGamePanel();
                         }
                     }
                 } catch (IOException e) {
@@ -385,9 +383,7 @@ public class Habitat extends JFrame {
             objects.addAll(dbHelper.loadObjects());
 
             gamePanel.removeAll();
-            uuidTree.clear();
             images.clear();
-            birthTimeMap.clear();
 
             objects.forEach(this::addCar);
         });
@@ -427,9 +423,7 @@ public class Habitat extends JFrame {
                 objects.clear();
                 objects.addAll(tmp);
                 gamePanel.removeAll();
-                uuidTree.clear();
                 images.clear();
-                birthTimeMap.clear();
 
                 for (AbstractCar car : objects) {
                     addCar(car);
@@ -487,6 +481,7 @@ public class Habitat extends JFrame {
      * Функция запуска симуляции
      */
     private void startSim() {
+        gamePanel.removeAll();
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
         startButton.setFocusable(false);
@@ -527,7 +522,7 @@ public class Habitat extends JFrame {
 
                 timerLabel.setText("Время: " + Math.round(simTime / 1000.f) + " Легковые: " + PassengerCarNum + " Грузовые: " + TruckNum);
 
-                Update(simTime); // обновляем таймер
+                update(simTime); // обновляем таймер
             }
         }, 0, 1000); // каждую 0,1 секунду запускается update
     }
@@ -597,7 +592,7 @@ public class Habitat extends JFrame {
      *
      * @param timeFromStart время симуляции
      */
-    private void Update(long timeFromStart) {
+    private void update(long timeFromStart) {
 
         if (timeFromStart > truckTime + truckGenTime * 1000 && truckLifeTime != 0) {
             truckTime += truckGenTime * 1000;
@@ -608,7 +603,6 @@ public class Habitat extends JFrame {
                         (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart, truckLifeTime));
                 addCar(objects.get(objects.size() - 1));
             }
-            checkLifetime(timeFromStart);
             repaint();
             revalidate();
         }
@@ -621,10 +615,12 @@ public class Habitat extends JFrame {
                         (float) (Math.random() * gamePanel.getHeight() - 25), timeFromStart, carLifeTime));
                 addCar(objects.get(objects.size() - 1));
             }
-            checkLifetime(timeFromStart);
-            repaint();
-            revalidate();
         }
+
+        checkLifetime(timeFromStart);
+
+        repaint();
+        revalidate();
     }
 
     private void addCar(AbstractCar car) {
@@ -634,8 +630,6 @@ public class Habitat extends JFrame {
         tmp.setLocation(Math.round(car.getX()), Math.round(car.getY()));
         gamePanel.add(tmp);
         images.put(car.getId(), tmp);
-        uuidTree.add(car.getId());
-        birthTimeMap.put(car.getId(), car.getBirthTime());
     }
 
     private void checkLifetime(long timeFromStart) {
@@ -646,7 +640,9 @@ public class Habitat extends JFrame {
                     iterator.remove();
                     JLabel img = images.get(car.getId());
                     images.remove(car.getId());
-                    gamePanel.remove(img);
+                    if (img != null) {
+                        gamePanel.remove(img);
+                    }
                     if (car instanceof Truck) TruckNum--;
                     else PassengerCarNum--;
                 }

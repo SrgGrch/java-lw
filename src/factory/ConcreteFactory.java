@@ -24,6 +24,7 @@ public class ConcreteFactory implements AbstractFactory {
 
     @Override
     public PassengerCar createPassengerCar(float x, float y, long birthTime, long lifetime) {
+        System.out.println("x: " + x + "y: " + y);
         return new PassengerCar(x, y, birthTime, lifetime);
     }
 

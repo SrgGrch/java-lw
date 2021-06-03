@@ -80,12 +80,12 @@ public abstract class AbstractCar implements IBehaviour, Serializable {
     public byte[] toBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(SIZE);
         buffer.putInt(this instanceof Truck ? 1 : 0);
+        buffer.putLong(getId().getMostSignificantBits());
+        buffer.putLong(getId().getLeastSignificantBits());
         buffer.putFloat(getX());
         buffer.putFloat(getY());
         buffer.putLong(getBirthTime());
         buffer.putLong(getLifetime());
-        buffer.putLong(getId().getMostSignificantBits());
-        buffer.putLong(getId().getLeastSignificantBits());
         return buffer.array();
     }
 
